@@ -126,11 +126,11 @@ spec:
           env:
             - name: REDIRECT_URIS
               value: |-
-                [ "https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*" ]
+                [ "https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*","https://schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*" ]
             - name: REALM_NAME
               value: realm
             - name: URL
-              value: https://code.europa.eu/simpl/simpl-open/development/iaa/charts/-/raw/develop/samples/keycloak-realms/2.0.0/authority-realm-export.json?ref_type=heads
+              value: https://code.europa.eu/simpl/simpl-open/development/iaa/charts/-/raw/develop/samples/keycloak-realms/2.1.0/authority-realm-export.json?ref_type=heads
           args:
             - |
               curl ${URL} | envsubst '$REDIRECT_URIS' > /config/${REALM_NAME}.json;   
@@ -269,19 +269,19 @@ spec:
         resources: {{- toYaml .Values.tier1_gateway.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.simpl_fe.projectID }}/packages/helm/stable"
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.fe_users_roles.projectID }}/packages/helm/stable"
     path: "''"
-    targetRevision: {{ .Values.simpl_fe.targetRevision }}
-    chart: {{ .Values.simpl_fe.chart_name }}
+    targetRevision: {{ .Values.fe_users_roles.targetRevision }}
+    chart: {{ .Values.fe_users_roles.chart_name }}
     helm:
       valueFiles:
-        {{- range .Values.simpl_fe.valueFiles }}
-        - $values/app-values/Simpl-fe/{{ . }}
+        {{- range .Values.fe_users_roles.valueFiles }}
+        - $values/app-values/fe-users-roles/{{ . }}
         {{- end }}
       values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         ingress:
           issuer: {{ .Values.cluster.issuer }}
-        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         cors:
           allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
         env:
@@ -290,7 +290,7 @@ spec:
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority"
+          value: "authority" 
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
         {{- if eq .Values.resourcePreset "low" }}
@@ -299,8 +299,144 @@ spec:
             cpu: "0"
             memory: "0"
         {{- else }}
-          {{- if .Values.simpl_fe.resources }}
-        resources: {{- toYaml .Values.simpl_fe.resources | nindent 10 }}
+          {{- if .Values.fe_users_roles.resources }}
+        resources: {{- toYaml .Values.fe_users_roles.resources | nindent 10 }}
+          {{- end }}
+        {{- end }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.fe_identity_provider.projectID }}/packages/helm/stable"
+    path: "''"
+    targetRevision: {{ .Values.fe_identity_provider.targetRevision }}
+    chart: {{ .Values.fe_identity_provider.chart_name }}
+    helm:
+      valueFiles:
+        {{- range .Values.fe_identity_provider.valueFiles }}
+        - $values/app-values/fe-identity-provider/{{ . }}
+        {{- end }}
+      values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
+        {{- if eq .Values.resourcePreset "low" }}
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+        {{- else }}
+          {{- if .Values.fe_identity_provider.resources }}
+        resources: {{- toYaml .Values.fe_identity_provider.resources | nindent 10 }}
+          {{- end }}
+        {{- end }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.fe_onboarding.projectID }}/packages/helm/stable"
+    path: "''"
+    targetRevision: {{ .Values.fe_onboarding.targetRevision }}
+    chart: {{ .Values.fe_onboarding.chart_name }}
+    helm:
+      valueFiles:
+        {{- range .Values.fe_onboarding.valueFiles }}
+        - $values/app-values/fe-onboarding/{{ . }}
+        {{- end }}
+      values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
+        {{- if eq .Values.resourcePreset "low" }}
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+        {{- else }}
+          {{- if .Values.fe_onboarding.resources }}
+        resources: {{- toYaml .Values.fe_onboarding.resources | nindent 10 }}
+          {{- end }}
+        {{- end }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.fe_security_attribute_provider.projectID }}/packages/helm/stable"
+    path: "''"
+    targetRevision: {{ .Values.fe_security_attribute_provider.targetRevision }}
+    chart: {{ .Values.fe_security_attribute_provider.chart_name }}
+    helm:
+      valueFiles:
+        {{- range .Values.fe_security_attribute_provider.valueFiles }}
+        - $values/app-values/fe-security-attribute-provider/{{ . }}
+        {{- end }}
+      values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
+        {{- if eq .Values.resourcePreset "low" }}
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+        {{- else }}
+          {{- if .Values.fe_security_attribute_provider.resources }}
+        resources: {{- toYaml .Values.fe_security_attribute_provider.resources | nindent 10 }}
+          {{- end }}
+        {{- end }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.fe_auth_provider.projectID }}/packages/helm/stable"
+    path: ''
+    targetRevision: {{ .Values.fe_auth_provider.targetRevision }}
+    chart: {{ .Values.fe_auth_provider.chart_name }}
+    helm:
+      valueFiles:
+        {{- range .Values.fe_auth_provider.valueFiles }}
+        - $values/app-values/fe-auth-provider/{{ . }}
+        {{- end }}
+      values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000       
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
+        {{- if eq .Values.resourcePreset "low" }}
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+        {{- else }}
+          {{- if .Values.fe_auth_provider.resources }}
+        resources: {{- toYaml .Values.fe_auth_provider.resources | nindent 10 }}
           {{- end }}
         {{- end }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.sap.projectID }}/packages/helm/stable"
@@ -490,17 +626,22 @@ spec:
         microservices:
           identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
           usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        appConfig:
+          email-service:
+            onboarding-request-url:
+              applicant-url-template: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/onboarding/application/additional-request
+              notary-url-template: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/onboarding/administration/{id}
         kafkaConfig:
-        spring:
-          kafka:
-            bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
-            producer:
-              properties:
-                security.protocol: SASL_PLAINTEXT
-                sasl.mechanism: PLAIN
-                sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_onboarding" password="${KAFKA_ONBOARDING}";
-            admin:
-              auto-create: true
+          spring:
+            kafka:
+              bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
+              producer:
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_onboarding" password="${KAFKA_ONBOARDING}";
+              admin:
+                auto-create: true
         simpl:
           kafka:
             topic:
@@ -670,11 +811,29 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
-        urlAuthorityT2: "tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
-        db:
-          url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
-          username: {{ .Values.namespaceTag.authority }}_authenticationprovider
-          password: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-authenticationprovider
+        appConfig:
+          management:
+            otlp:
+              tracing:
+                endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+          spring:
+            datasource:
+              url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
+              username: {{ .Values.namespaceTag.authority }}_authenticationprovider
+            data:
+              redis:
+                host: "redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local"
+          microservice:
+            identity-provider:
+              url: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+            security-attributes-provider:
+              url: http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          client:
+            authority:
+              url: "https://tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+          simpl:
+            certificate:
+              san: "tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
         env:
         - name: KAFKA_AUTHPROVIDER
           value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_authprovider"
@@ -683,13 +842,8 @@ spec:
             secretKeyRef:
               name: redis-secrets
               key: redis
-        microservices:
-          usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
-        simpl:
-          certificate:
-            san: "tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
-        redis:
-          host: "redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-authenticationprovider"
         kafkaConfig:
           spring:
             kafka:
@@ -755,6 +909,9 @@ spec:
         - $values/app-values/simpl-schema-manager/{{ . }}
         {{- end }}
       values: |
+        ingress:
+          host: schema-manager-be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          clusterIssuer: {{ .Values.cluster.issuer }}
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           role: {{ .Values.secrets.role }}
@@ -767,6 +924,46 @@ spec:
         {{- else }}
           {{- if .Values.simpl_schema_manager.resources }}
         resources: {{- toYaml .Values.simpl_schema_manager.resources| nindent 12 }}
+          {{- end }}
+        {{- end }}
+  {{- end }}
+  {{- if .Values.simpl_schema_manager_ui.enabled }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.simpl_schema_manager_ui.projectID }}/packages/helm/stable"
+    path: ''
+    targetRevision: {{ .Values.simpl_schema_manager_ui.targetRevision }}
+    chart: {{ .Values.simpl_schema_manager_ui.chart_name }}
+    helm:
+      releaseName: {{ .Values.simpl_schema_manager_ui.fullnameOverride }}
+      valueFiles:
+        {{- range .Values.simpl_schema_manager_ui.valueFiles }}
+        - $values/app-values/simpl-schema-manager-ui/{{ . }}
+        {{- end }}
+      values: |
+        ingress:
+          hosts:
+          - host: schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+          tls:
+          - secretName: schema-manager-fe-tls
+            hosts:
+              - schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          annotations:
+            cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
+        env:
+          PUBLIC_AUTH_KEYCLOAK_SERVER_URL: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+          PUBLIC_AUTH_KEYCLOAK_REALM: 'authority'
+          PUBLIC_AUTH_KEYCLOAK_CLIENT_ID: 'frontend-cli'
+          PUBLIC_SCHEMA_MANAGER_API_URL: 'https://schema-manager-be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1'
+        {{- if eq .Values.resourcePreset "low" }}
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+        {{- else }}
+          {{- if .Values.simpl_schema_manager_ui.resources }}
+        resources: {{- toYaml .Values.simpl_schema_manager_ui.resources| nindent 12 }}
           {{- end }}
         {{- end }}
   {{- end }}

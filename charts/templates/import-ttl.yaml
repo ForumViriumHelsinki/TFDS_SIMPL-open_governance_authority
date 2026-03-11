@@ -24,8 +24,8 @@ data:
     until curl -s --head --fail "$1/schemas" >/dev/null; do echo "Waiting for endpoint to become available..."; sleep 5; done
 
     # Raw file URLs
-    FILE1_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/main/yaml2ontology/simpl_ontology_generated.ttl"
-    FILE2_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/main/yaml2shape/merged-shapes.ttl"
+    FILE1_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/feature/pre-release-S23/yaml2ontology/simpl_ontology_generated.ttl"
+    FILE2_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/feature/pre-release-S23/yaml2shape/merged-shapes.ttl"
 
     # Temporary files
     TMP1=$(mktemp)

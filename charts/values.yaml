@@ -1,6 +1,6 @@
 values:
-  repo_URL: https://github.com/TatuE/so-ga.git
-  branch: main
+  repo_URL: https://code.europa.eu/simpl/simpl-open/development/agents/governance-authority.git
+  branch: v3.0.3
 
 project: ${PROJECT}
 domainSuffix: ${DOMAINSUFFIX}
@@ -8,8 +8,8 @@ namespaceTag:
   authority: ${AUTHNAMESPACETAG}
   common: ${COMMONSPACETAG}
 
-#resourcePreset: default
-resourcePreset: low
+resourcePreset: default
+# resourcePreset: low
 
 argocd:
   appname: ${NAMESPACE}
@@ -37,7 +37,7 @@ keycloak:
       memory: "512Mi"
     limits:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1Gi"
   valueFiles:
     - values.yaml
 
@@ -52,13 +52,13 @@ ejbca:
       memory: "1024Mi"
     limits:
       cpu: "500m"
-      memory: "1024Mi" 
+      memory: "1024Mi"
   valueFiles:
     - values.yaml
 
 tier1_gateway:
   projectID: "772"
-  targetRevision: 2.5.0
+  targetRevision: 2.8.0
   chart_name: tier1-gateway
   resources:
     requests:
@@ -66,28 +66,13 @@ tier1_gateway:
       memory: "512Mi"
     limits:
       cpu: "400m"
-      memory: "512Mi"  
-  valueFiles:
-    - values.yaml
-
-simpl_fe:
-  projectID: "769"
-  targetRevision: 2.5.0
-  chart_name: simpl-fe
-  resources:
-    requests:
-      cpu: "400m"
       memory: "512Mi"
-    limits:
-      cpu: "400m"
-      memory: "512Mi" 
   valueFiles:
     - values.yaml
-    - values-authority.yaml
 
 sap:
   projectID: "861"
-  targetRevision: 2.5.1
+  targetRevision: 2.8.0
   chart_name: security-attributes-provider
   resources:
     requests:
@@ -95,13 +80,13 @@ sap:
       memory: "512Mi"
     limits:
       cpu: "400m"
-      memory: "512Mi" 
+      memory: "512Mi"
   valueFiles:
     - values.yaml
 
 users_roles:
   projectID: "771"
-  targetRevision: 2.5.1
+  targetRevision: 2.8.0
   chart_name: users-roles
   resources:
     requests:
@@ -109,15 +94,74 @@ users_roles:
       memory: "512Mi"
     limits:
       cpu: "400m"
-      memory: "512Mi" 
+      memory: "512Mi"
   valueFiles:
     - values.yaml
 
+fe_auth_provider:
+  projectID: "1308"
+  targetRevision: 2.8.3
+  chart_name: fe-authentication-provider
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+
+fe_users_roles:
+  projectID: "1310"
+  targetRevision: 2.8.3
+  chart_name: fe-users-and-roles
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "400m"
+      memory: "512Mi"
+
+fe_identity_provider:
+  projectID: "1311"
+  targetRevision: 2.8.4
+  chart_name: fe-identity-provider
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "400m"
+      memory: "512Mi"
+
+fe_onboarding:
+  projectID: "1307"
+  targetRevision: 2.8.2
+  chart_name: fe-onboarding
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "400m"
+      memory: "512Mi"
+
+fe_security_attribute_provider:
+  projectID: "1309"
+  targetRevision: 2.8.0
+  chart_name: fe-security-attribute-provider
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "400m"
+      memory: "512Mi"
 
 xsfc_catalogue:
   enabled: true
   projectID: "820"
-  targetRevision: 1.0.11
+  targetRevision: 1.0.12
   chart_name: fc-service
   resources:
     requests:
@@ -125,13 +169,13 @@ xsfc_catalogue:
       memory: "2Gi"
     limits:
       cpu: "2"
-      memory: "4Gi" 
+      memory: "4Gi"
   valueFiles:
     - values.yaml
 
 onboarding:
   projectID: "770"
-  targetRevision: 2.5.0
+  targetRevision: 2.8.1
   chart_name: onboarding
   resources:
     requests:
@@ -139,12 +183,12 @@ onboarding:
       memory: "512Mi"
     limits:
       cpu: "1"
-      memory: "1Gi" 
+      memory: "1Gi"
 
 adapter:
   enabled: true
   projectID: "759"
-  targetRevision: 1.0.13
+  targetRevision: 1.0.14
   chart_name: poc-charts
   fullnameOverride: adapter
   valueFiles:
@@ -152,7 +196,7 @@ adapter:
 
 tier2_gateway:
   projectID: "860"
-  targetRevision: 2.5.0
+  targetRevision: 2.8.0
   chart_name: tier2-gateway
   resources:
     requests:
@@ -160,7 +204,7 @@ tier2_gateway:
       memory: "512Mi"
     limits:
       cpu: "400m"
-      memory: "512Mi" 
+      memory: "512Mi"
   valueFiles:
     - values.yaml
     - values-routes-authority.yaml
@@ -168,7 +212,7 @@ tier2_gateway:
 
 identity_provider:
   projectID: "913"
-  targetRevision: 2.5.2
+  targetRevision: 2.8.0
   chart_name: identity-provider
   fullnameOverride: identity-provider
   resources:
@@ -183,7 +227,7 @@ identity_provider:
 
 auth_provider:
   projectID: "939"
-  targetRevision: 2.5.2
+  targetRevision: 2.8.0
   chart_name: authentication-provider
   resources:
     requests:
@@ -191,7 +235,7 @@ auth_provider:
       memory: "400Mi"
     limits:
       cpu: "500m"
-      memory: "1Gi" 
+      memory: "1Gi"
   valueFiles:
     - values.yaml
 
@@ -226,7 +270,7 @@ redis_commander:
 
 tier2_proxy:
   projectID: "1112"
-  targetRevision: 1.0.1
+  targetRevision: 1.2.1
   chart_name: tier2-proxy
   resources:
     requests:
@@ -239,7 +283,7 @@ tier2_proxy:
 simpl_schema_manager:
   enabled: true
   projectID: "1124"
-  targetRevision: 0.0.7
+  targetRevision: 0.0.13
   chart_name: simpl-schema-manager-charts
   fullnameOverride: simpl-schema-manager
   resources:
@@ -248,14 +292,30 @@ simpl_schema_manager:
       memory: "512Mi"
     limits:
       cpu: "500m"
-      memory: "512Mi"  
+      memory: "512Mi"
   valueFiles:
-    - values.yaml      
+    - values.yaml
+
+simpl_schema_manager_ui:
+  enabled: true
+  projectID: "1257"
+  targetRevision: 1.1.1
+  chart_name: schema-manager-ui
+  fullnameOverride: simpl-schema-manager-ui
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  valueFiles:
+    - values.yaml
 
 monitoring:
   enabled: true
   projectID: "828"
-  targetRevision: 0.2.0
+  targetRevision: 0.3.1
   chart_name: eck-monitoring
   fullnameOverride: elastic
   resources:

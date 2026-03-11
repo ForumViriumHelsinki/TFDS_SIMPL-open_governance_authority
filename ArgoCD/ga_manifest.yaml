@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/TatuE/so-ga.git'
+    repoURL: 'https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git'
     path: charts
     targetRevision: main                  # version of package
     helm:
