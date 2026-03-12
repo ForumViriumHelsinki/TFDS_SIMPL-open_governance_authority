@@ -1,6 +1,6 @@
 values:
-  repo_URL: https://code.europa.eu/simpl/simpl-open/development/agents/governance-authority.git
-  branch: v3.0.3
+  repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
+  branch: main
 
 project: ${PROJECT}
 domainSuffix: ${DOMAINSUFFIX}
