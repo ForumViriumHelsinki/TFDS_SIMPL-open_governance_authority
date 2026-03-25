@@ -36,16 +36,6 @@ appConfig:
 
     logging:
       business:
-        - method: GET
-          path: /authApi/v1/mtls/ping
-          config:
-            operations:
-              - PING_REQUEST
-        - method: GET
-          path: /identityApi/v1/mtls/echo
-          config:
-            operations:
-              - ECHO_REQUEST
         - config:
             operations:
             - PUBLISH_CATALOG

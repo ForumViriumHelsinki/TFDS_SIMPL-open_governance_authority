@@ -15,36 +15,36 @@ spec:
     server: {{ .Values.cluster.address }}
     namespace: {{ .Values.cluster.namespace }}
   sources:
-  - repoURL: {{ .Values.values.repo_URL }}
-    targetRevision: {{ .Values.values.branch }}
-    ref: values
-  - repoURL: {{ .Values.redis.repo_URL }}
-    targetRevision: {{ .Values.redis.targetRevision }}
-    chart: {{ .Values.redis.chart_name }}
-    helm:
-      valueFiles:
-        {{- range .Values.redis.valueFiles }}
-        - $values/app-values/Redis/{{ . }}
-        {{- end }}
-      values: |
-        fullnameOverride: {{ .Values.redis.nameOverride }}
-        master:
-          podAnnotations:
-            vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-            vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
-          {{- if .Values.redis.resourcesPreset }}
-          resourcesPreset: {{ .Values.redis.resourcesPreset }}
+    - repoURL: {{ .Values.values.repo_URL }}
+      targetRevision: {{ .Values.values.branch }}
+      ref: values
+    - repoURL: {{ .Values.redis.repo_URL }}
+      targetRevision: {{ .Values.redis.targetRevision }}
+      chart: {{ .Values.redis.chart_name }}
+      helm:
+        valueFiles:
+          {{- range .Values.redis.valueFiles }}
+          - $values/app-values/Redis/{{ . }}
           {{- end }}
-          {{- if eq .Values.resourcePreset "low" }}
-          resources:
-            requests:
-              cpu: "0"
-              memory: "0"
-          {{- else }}
-            {{- if .Values.redis.resources }}
-          resources: {{- toYaml .Values.redis.resources | nindent 10 }}
+        values: |
+          fullnameOverride: {{ .Values.redis.nameOverride }}
+          master:
+            podAnnotations:
+              vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
+              vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+            {{- if .Values.redis.resourcesPreset }}
+            resourcesPreset: {{ .Values.redis.resourcesPreset }}
             {{- end }}
-          {{- end }}
+            {{- if eq .Values.resourcePreset "low" }}
+            resources:
+              requests:
+                cpu: "0"
+                memory: "0"
+            {{- else }}
+              {{- if .Values.redis.resources }}
+            resources: {{- toYaml .Values.redis.resources | nindent 10 }}
+              {{- end }}
+            {{- end }}
   {{- if .Values.redis_commander.enabled }}
   - repoURL: {{ .Values.redis_commander.repo_URL }}
     targetRevision: {{ .Values.redis_commander.targetRevision }}
@@ -563,7 +563,7 @@ spec:
         resources: {{- toYaml .Values.users_roles.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  {{- if .Values.xsfc_catalogue.enabled }}      
+  {{- if .Values.xsfc_catalogue.enabled }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.xsfc_catalogue.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.xsfc_catalogue.targetRevision }}
@@ -602,7 +602,7 @@ spec:
         resources: {{- toYaml .Values.xsfc_catalogue.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  {{- end }}      
+  {{- end }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.onboarding.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.onboarding.targetRevision }}
@@ -734,7 +734,7 @@ spec:
         resources: {{- toYaml .Values.tier2_proxy.resources | nindent 10 }}
           {{- end }}
         {{- end }}      
-  {{- if .Values.adapter.enabled }}                    
+  {{- if .Values.adapter.enabled }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.adapter.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.adapter.targetRevision }}
@@ -753,7 +753,7 @@ spec:
           role: {{ .Values.secrets.role }}
           secretEngine: {{ .Values.secrets.secretEngine }}
         secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-adapter-simpl-backend"  
-  {{- end }}        
+  {{- end }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.identity_provider.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.identity_provider.targetRevision }}
