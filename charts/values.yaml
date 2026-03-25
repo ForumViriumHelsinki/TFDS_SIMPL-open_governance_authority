@@ -1,6 +1,6 @@
 values:
   repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
-  branch: main
+  branch: v3.0.3
 
 project: ${PROJECT}
 domainSuffix: ${DOMAINSUFFIX}
@@ -253,7 +253,7 @@ redis:
     - values.yaml
 
 redis_commander:
-  enabled: false
+  enabled: true
   repo_URL: 'https://github.com/joeferner/redis-commander.git'
   targetRevision: master
   nameOverride: redis-commander
