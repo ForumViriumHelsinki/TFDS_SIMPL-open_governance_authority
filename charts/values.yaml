@@ -253,7 +253,7 @@ redis:
     - values.yaml
 
 redis_commander:
-  enabled: true
+  enabled: false
   repo_URL: 'https://github.com/joeferner/redis-commander.git'
   targetRevision: master
   nameOverride: redis-commander

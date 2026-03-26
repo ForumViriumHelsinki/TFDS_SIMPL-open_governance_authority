@@ -66,17 +66,17 @@ spec:
       annotations:
         {{- with .Values.podAnnotations }}
           {{- toYaml . | nindent 8 }}
-          {{- end }}
+        {{- end }}
     spec:
       restartPolicy: Never
       containers:
-        - name: script-runner
-          image: quay.io/curl/curl
-          command: ["/bin/sh", "/postconfig/import-ttl.sh", "http://xsfc-service:8081"]
-          volumeMounts:
-            - name: postconfig-volume
-              mountPath: /postconfig
-      volumes:
+      - name: script-runner
+        image: quay.io/curl/curl
+        command: ["/bin/sh", "/postconfig/import-ttl.sh", "http://xsfc-service:8081"]
+        volumeMounts:
         - name: postconfig-volume
-          configMap:
-            name: import-ttl-job
+          mountPath: /postconfig
+      volumes:
+      - name: postconfig-volume
+        configMap:
+          name: import-ttl-job
