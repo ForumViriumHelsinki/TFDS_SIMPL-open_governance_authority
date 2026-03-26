@@ -18,7 +18,7 @@ echo " Hostname (CN):     $TIER2_HOSTNAME"
 echo " Organization:      $ORG_NAME ($COUNTRY)"
 echo "========================================================"
 
-# 1. Establish Port Forwarding
+# Establish Port Forwarding
 echo "-> Establishing port forwarding..."
 kubectl -n "$NAMESPACE" port-forward svc/authentication-provider 8080:8080 > /dev/null 2>&1 &
 AUTH_PF_PID=$!
@@ -36,7 +36,7 @@ export AUTHORITY_IDENTITY_PROVIDER="http://localhost:8090"
 CSR_FILE="csr.pem"
 CERT_FILE="cert.pem"
 
-# 2. Execution
+# Execute Workflow
 echo "-> Generating Keypair..."
 curl -s -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null
 
@@ -63,7 +63,7 @@ echo "-> Uploading CSR to Identity Provider..."
 curl -s -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
 -F "csr=@$CSR_FILE" > /dev/null
 
-echo "-> Downloading Signed Credential from Identity Provider..."
+echo "-> Downloading Signed Credential..."
 curl -s "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
 -o "$CERT_FILE"
 
@@ -72,10 +72,6 @@ CREDENTIAL_ID=$(curl -s -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
 -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/')
 echo "   Stored Credential ID: $CREDENTIAL_ID"
 
-echo "-> Activating the Credential (Fixing the 404 loop)..."
-curl -s -X PUT "$AUTHORITY_AUTH_PROVIDER/v1/credentials/$CREDENTIAL_ID/active" > /dev/null
-
 echo "========================================================"
 echo " Initialization Complete!"
-echo " Check your tier2-gateway pod; it should now be Running."
 echo "========================================================"
