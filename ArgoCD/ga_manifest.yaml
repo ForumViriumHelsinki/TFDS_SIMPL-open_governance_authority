@@ -8,11 +8,11 @@ spec:
   source:
     repoURL: 'https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git'
     path: charts
-    targetRevision: main                  # version of package
+    targetRevision: v3.0.3                  # version of package
     helm:
       values: |
         values:
-          branch: main                 # branch of repo with values - for released version it should be the release branch
+          branch: v3.0.3                 # branch of repo with values - for released version it should be the release branch
         project: default                    # Project to which the namespace is attached
         namespaceTag: 
           authority: authority            # identifier of deployment and part of fqdn for this agent
