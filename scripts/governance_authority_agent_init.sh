@@ -1,11 +1,11 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 # ==============================================================================
 # CONFIGURATION VARIABLES
 # ==============================================================================
 NAMESPACE=${NAMESPACE:-"authority"}
-TIER2_HOSTNAME=${TIER2_HOSTNAME:-"authority.be.authority.ds.helsinki.tfds.io"}
+TIER2_HOSTNAME=${TIER2_HOSTNAME:-"tls.authority.ds.helsinki.tfds.io"}
 ORG_NAME=${ORG_NAME:-"FVH"}
 ORG_UNIT=${ORG_UNIT:-"Data"}
 COUNTRY=${COUNTRY:-"FI"}
@@ -16,6 +16,7 @@ echo " Starting Simpl Identity Initialization"
 echo " Target Namespace:  $NAMESPACE"
 echo " Hostname (CN):     $TIER2_HOSTNAME"
 echo " Organization:      $ORG_NAME ($COUNTRY)"
+echo " Participant Type:  $PARTICIPANT_TYPE"
 echo "========================================================"
 
 # Establish Port Forwarding
@@ -29,7 +30,7 @@ ID_PF_PID=$!
 trap "echo '-> Cleaning up port-forwarding jobs...'; kill $AUTH_PF_PID $ID_PF_PID 2>/dev/null || true" EXIT
 
 echo "-> Waiting for connections to establish..."
-sleep 4
+sleep 10
 
 export AUTHORITY_AUTH_PROVIDER="http://localhost:8080"
 export AUTHORITY_IDENTITY_PROVIDER="http://localhost:8090"
@@ -38,20 +39,20 @@ CERT_FILE="cert.pem"
 
 # Execute Workflow
 echo "-> Generating Keypair..."
-curl -s -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null
+curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null
 
 echo "-> Generating CSR..."
-curl -s -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
+curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
 --header 'Content-Type: application/json' \
 --data-raw "{
   \"commonName\": \"$TIER2_HOSTNAME\",
   \"country\": \"$COUNTRY\",
   \"organization\": \"$ORG_NAME\",
   \"organizationalUnit\": \"$ORG_UNIT\"
-}" | jq -r '.csr // .' > "$CSR_FILE"
+}" > "$CSR_FILE"
 
 echo "-> Creating Participant in Identity Provider..."
-PARTICIPANT_ID=$(curl -s -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
+PARTICIPANT_ID=$(curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
 --header 'Content-Type: application/json' \
 --data-raw "{
   \"organization\": \"$ORG_NAME\",
@@ -60,15 +61,15 @@ PARTICIPANT_ID=$(curl -s -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" 
 echo "   Participant ID: $PARTICIPANT_ID"
 
 echo "-> Uploading CSR to Identity Provider..."
-curl -s -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
+curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
 -F "csr=@$CSR_FILE" > /dev/null
 
 echo "-> Downloading Signed Credential..."
-curl -s "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
+curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
 -o "$CERT_FILE"
 
 echo "-> Uploading Signed Credential to Authentication Provider..."
-CREDENTIAL_ID=$(curl -s -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
+CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
 -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/')
 echo "   Stored Credential ID: $CREDENTIAL_ID"
 
