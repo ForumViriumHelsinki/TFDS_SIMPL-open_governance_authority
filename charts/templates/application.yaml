@@ -601,6 +601,10 @@ spec:
             memory: "0"
         neo4j:
           neo4j:
+            {{- if .Values.singleNode }}
+            service:
+              type: ClusterIP
+            {{- end }}
             resources:
               cpu: "500m"
         {{- else }}
