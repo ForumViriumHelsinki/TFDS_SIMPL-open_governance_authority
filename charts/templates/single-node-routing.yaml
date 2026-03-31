@@ -1,0 +1,59 @@
+{{- if .Values.singleNode }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tier2-gateway-passthrough
+  namespace: {{ .Values.cluster.namespace }}
+  annotations:
+    # This is the magic line that tells Nginx to stream raw TCP to tier2_gateway
+    # allowing it to verify the mTLS Participant Credential.
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tier2-gateway
+            port:
+              number: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: neo4j-browser-ingress
+  namespace: {{ .Values.cluster.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - db.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+    secretName: neo4j-browser-tls
+  rules:
+  - host: db.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: xsfc-neo4j-db-lb-neo4j
+            port:
+              number: 7474
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  # Format: <nginx-listen-port>: <namespace>/<service-name>:<target-port>
+  "7687": "{{ .Values.cluster.namespace }}/xsfc-neo4j-db-lb-neo4j:7687"
+{{- end }}
