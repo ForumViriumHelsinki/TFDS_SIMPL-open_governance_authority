@@ -126,7 +126,7 @@ spec:
           env:
             - name: REDIRECT_URIS
               value: '["https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*", "https://schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*"]'
-              - name: REALM_NAME
+            - name: REALM_NAME
               value: realm
             - name: URL
               value: https://code.europa.eu/simpl/simpl-open/development/iaa/charts/-/raw/develop/samples/keycloak-realms/2.1.0/authority-realm-export.json?ref_type=heads
