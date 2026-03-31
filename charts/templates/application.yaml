@@ -574,12 +574,6 @@ spec:
         - $values/app-values/xsfc-catalogue/{{ . }}
         {{- end }}
       values: |
-        {{- if .Values.singleNode }}
-        neo4j:
-          neo4j:
-            service:
-              type: ClusterIP
-        {{- end }}
         global:
           tls:
             - secretName: xsfc-server-tls
