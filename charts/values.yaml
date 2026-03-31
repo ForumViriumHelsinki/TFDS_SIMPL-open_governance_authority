@@ -1,4 +1,4 @@
-singleNode: false
+singleNode: ${SINGLENODE}
 
 values:
   repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
