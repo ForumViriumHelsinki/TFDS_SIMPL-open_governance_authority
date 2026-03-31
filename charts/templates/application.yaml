@@ -666,6 +666,10 @@ spec:
         - $values/app-values/tier2-gateway/{{ . }}
         {{- end }}
       values: |
+        {{- if .Values.singleNode }}
+        service:
+          type: ClusterIP
+        {{- end }}
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
@@ -966,4 +970,5 @@ spec:
         resources: {{- toYaml .Values.simpl_schema_manager_ui.resources| nindent 12 }}
           {{- end }}
         {{- end }}
+  {{- end }}end }}
   {{- end }}

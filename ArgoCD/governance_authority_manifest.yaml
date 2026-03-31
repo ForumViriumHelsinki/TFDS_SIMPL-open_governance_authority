@@ -11,6 +11,7 @@ spec:
     targetRevision: v3.0.3                  # version of package
     helm:
       values: |
+        singleNode: true
         values:
           branch: v3.0.3                 # branch of repo with values - for released version it should be the release branch
         project: default                    # Project to which the namespace is attached
