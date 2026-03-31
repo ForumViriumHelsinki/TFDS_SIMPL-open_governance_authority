@@ -970,5 +970,4 @@ spec:
         resources: {{- toYaml .Values.simpl_schema_manager_ui.resources| nindent 12 }}
           {{- end }}
         {{- end }}
-  {{- end }}end }}
   {{- end }}
