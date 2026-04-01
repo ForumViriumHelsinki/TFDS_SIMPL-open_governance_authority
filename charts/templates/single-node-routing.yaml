@@ -11,6 +11,9 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
   rules:
   - host: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
     http:
