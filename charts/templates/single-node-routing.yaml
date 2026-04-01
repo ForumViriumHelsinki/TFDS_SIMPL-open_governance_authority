@@ -37,10 +37,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - db.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+    - catalogue-db.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
     secretName: neo4j-browser-tls
   rules:
-  - host: db.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+  - host: catalogue-db.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
     http:
       paths:
       - path: /
