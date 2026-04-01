@@ -5,7 +5,7 @@ set -eo pipefail
 # CONFIGURATION VARIABLES
 # ==============================================================================
 NAMESPACE=${NAMESPACE:-"authority"}
-TIER2_HOSTNAME=${TIER2_HOSTNAME:-"tls.authority.authority.ds.helsinki.tfds.io/"}
+TIER2_HOSTNAME=${TIER2_HOSTNAME:-"tls.authority.authority.ds.helsinki.tfds.io"}
 ORG_NAME=${ORG_NAME:-"FVH"}
 ORG_UNIT=${ORG_UNIT:-"Data"}
 COUNTRY=${COUNTRY:-"FI"}
