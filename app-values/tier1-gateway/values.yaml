@@ -26,19 +26,14 @@ appConfig:
         - Path=/fc/**
         filters:
         - StripPrefix=1
-    abac:
-      - method: GET
-        path: "/fc/**"
-        disable-ephemeral-proof-check: true
-      - method: POST
-        path: "/fc/**"
-        disable-ephemeral-proof-check: true
-      - method: PUT
-        path: "/fc/**"
-        disable-ephemeral-proof-check: true
-      - method: DELETE
-        path: "/fc/**"
-        disable-ephemeral-proof-check: true
+      - id: schema-manager
+        uri: "http://schema-manager-service:8085"
+        predicates:
+        - Path=/schema-manager/**
+        filters:
+        - StripPrefix=1
+    public-urls:
+      - path: "/schema-manager/**"
   
   keycloak:
     app:

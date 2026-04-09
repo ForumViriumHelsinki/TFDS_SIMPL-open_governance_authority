@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 'authority01-deployer'             # name of the deploying app in argocd
+  name: 'authority-deployer'             # name of the deploying app in argocd
   namespace: argocd                        # namespace of your argocd
 spec:
   project: default
@@ -11,27 +11,28 @@ spec:
     targetRevision: main                  # version of package
     helm:
       values: |
+        singleNode: true
         values:
           branch: main                 # branch of repo with values - for released version it should be the release branch
         project: default                    # Project to which the namespace is attached
         namespaceTag: 
-          authority: authority01            # identifier of deployment and part of fqdn for this agent
-          common: common01                  # identifier of deployment and part of fqdn for common components
+          authority: authority            # identifier of deployment and part of fqdn for this agent
+          common: common                  # identifier of deployment and part of fqdn for common components
         domainSuffix: ds.helsinki.tfds.io           # last part of fqdn
         resourcePreset: low             # set to "low" to disable requests of resources
         argocd:
-          appname: authority01              # name of generated argocd app 
+          appname: authority              # name of generated argocd app 
           namespace: argocd                 # namespace of your argocd
         cluster:
           address: https://kubernetes.default.svc
-          namespace: authority01             # where the app will be deployed
-          commonToolsNamespace: common01      # namespace where main monitoring stack is deployed
+          namespace: authority             # where the app will be deployed
+          commonToolsNamespace: common      # namespace where main monitoring stack is deployed
           issuer: dev-prod            # certificate issuer name
         secrets:
           role: example-role                # role created in OpenBao for access
           secretEngine: example            # container for secrets in your OpenBao
         monitoring:
-          enabled: true                     # you can set it to false if you don't have common monitoring stack
+          enabled: false                     # you can set it to false if you don't have common monitoring stack
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: authority01                  # where the package will be deployed
+    namespace: authority                  # where the package will be deployed

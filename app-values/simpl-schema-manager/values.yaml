@@ -1,5 +1,10 @@
 ingress:
-  enabled: false
+  enabled: true
+  path: /v1/(.*)
+  pathType: ImplementationSpecific
+  tls:
+    secretName: schema-manager-be-tls
+  ingressClass: nginx
 
 serviceAccount:
   enabled: true

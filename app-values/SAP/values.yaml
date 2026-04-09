@@ -3,7 +3,7 @@ autoscaling:
 
 env:
   - name: TEST
-    value: vault:dev-int/data/common01-kafka-credentials#authority1_usersroles
+    value: vault:dev-int/data/common03-kafka-credentials#authority3_usersroles
 
 appConfig:
   spring: 

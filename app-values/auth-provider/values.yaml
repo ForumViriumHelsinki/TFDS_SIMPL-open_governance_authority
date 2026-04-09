@@ -6,7 +6,10 @@ keypair:
   algorithm: "ECDSA"
   keyLength: 256
 
-profile: "authority"
+appConfig:
+  spring:
+    profiles:
+      active: authority
 
 redis: 
   port: "6379"

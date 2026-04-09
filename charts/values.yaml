@@ -1,3 +1,5 @@
+singleNode: ${SINGLENODE}
+
 values:
   repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
   branch: main
@@ -253,7 +255,7 @@ redis:
     - values.yaml
 
 redis_commander:
-  enabled: false
+  enabled: true
   repo_URL: 'https://github.com/joeferner/redis-commander.git'
   targetRevision: master
   nameOverride: redis-commander

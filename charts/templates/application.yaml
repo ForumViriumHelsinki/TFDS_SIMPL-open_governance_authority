@@ -125,8 +125,7 @@ spec:
           command: ["/bin/sh", "-c"]
           env:
             - name: REDIRECT_URIS
-              value: |-
-                [ "https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*","https://schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*" ]
+              value: '["https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*", "https://schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*"]'
             - name: REALM_NAME
               value: realm
             - name: URL
@@ -594,6 +593,12 @@ spec:
             cpu: "0"
             memory: "0"
         neo4j:
+          {{- if .Values.singleNode }}
+          services:
+            neo4j:
+              spec:
+                type: ClusterIP
+          {{- end }}
           neo4j:
             resources:
               cpu: "500m"
@@ -666,6 +671,10 @@ spec:
         - $values/app-values/tier2-gateway/{{ . }}
         {{- end }}
       values: |
+        {{- if .Values.singleNode }}
+        service:
+          type: ClusterIP
+        {{- end }}
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
