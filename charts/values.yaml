@@ -2,7 +2,7 @@ singleNode: ${SINGLENODE}
 
 values:
   repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
-  branch: v3.0.3
+  branch: main
 
 project: ${PROJECT}
 domainSuffix: ${DOMAINSUFFIX}
