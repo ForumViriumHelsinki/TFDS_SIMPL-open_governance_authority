@@ -6,7 +6,9 @@ metadata:
   namespace: {{ .Values.cluster.namespace }}
 data:
   import-ttl.sh: |
-    #!/bin/bash
+    #!/bin/sh
+
+    # Exit on error
     set -e
 
     # ======================================================================================
@@ -22,29 +24,20 @@ data:
     #    insulating us from upstream breaking changes.
     # ======================================================================================
 
+    # Usage check
     if [ -z "$1" ]; then
       echo "Usage: $0 <ENDPOINT_URL>"
       exit 1
     fi
 
+    # Get the endpoint from the first argument
     ENDPOINT_URL="$1"
+    SCHEMA_PATH="/schemas"
 
     # Healthcheck
     until curl -s --head --fail "${ENDPOINT_URL}/schemas" >/dev/null; do
       echo "Waiting for endpoint to become available..."; sleep 5;
     done
-
-    # Function to properly URL encode strings (POSIX safe, no jq required)
-    urlencode() {
-        local length="${#1}"
-        for (( i = 0; i < length; i++ )); do
-            local c="${1:i:1}"
-            case $c in
-                [a-zA-Z0-9.~_-]) printf "$c" ;;
-                *) printf '%%%02X' "'$c" ;;
-            esac
-        done
-    }
 
     # Smart loader function
     load_schema() {
@@ -58,7 +51,7 @@ data:
       curl -sSL "$FILE_URL" -o "$TMP_FILE"
 
       echo "Attempting to create (POST) $FILE_NAME..."
-      RESPONSE=$(curl -s -w "\n%{http_code}" --location "${ENDPOINT_URL}/schemas" \
+      RESPONSE=$(curl -s -w "\n%{http_code}" --location "${ENDPOINT_URL}${SCHEMA_PATH}" \
         --header "Content-Type: text/turtle" \
         --header "Accept: application/json" \
         --data-binary @"$TMP_FILE")
@@ -66,11 +59,14 @@ data:
       HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
       BODY=$(echo "$RESPONSE" | sed '$d')
 
-      if [[ "$BODY" == *"conflict_error"* ]] || [[ "$BODY" == *"Schema redefines existing terms"* ]]; then
+      if echo "$BODY" | grep -q "conflict_error" || echo "$BODY" | grep -q "Schema redefines existing terms"; then
         echo "Schema already exists. Falling back to update (PUT)..."
-        ENCODED_ID=$(urlencode "$SCHEMA_ID")
 
-        curl -s --location "${ENDPOINT_URL}/schemas/${ENCODED_ID}" \
+        # URL Encode the schema ID using sed (Alpine/POSIX compatible)
+        # Replaces ':', '/', and '#' with their percent-encoded equivalents
+        ENCODED_ID=$(echo "$SCHEMA_ID" | sed 's/:/%3A/g' | sed 's/\//%2F/g' | sed 's/#/%23/g')
+
+        curl -s --location "${ENDPOINT_URL}${SCHEMA_PATH}/${ENCODED_ID}" \
           --request PUT \
           --header "Content-Type: text/turtle" \
           --header "Accept: application/json" \
