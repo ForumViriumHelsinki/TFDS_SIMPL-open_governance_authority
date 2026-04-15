@@ -66,20 +66,32 @@ data:
         # Replaces ':', '/', and '#' with their percent-encoded equivalents
         ENCODED_ID=$(echo "$SCHEMA_ID" | sed 's/:/%3A/g' | sed 's/\//%2F/g' | sed 's/#/%23/g')
 
-        curl -s --location "${ENDPOINT_URL}${SCHEMA_PATH}/${ENCODED_ID}" \
+        PUT_RESPONSE=$(curl -s -w "\n%{http_code}" --location "${ENDPOINT_URL}${SCHEMA_PATH}/${ENCODED_ID}" \
           --request PUT \
           --header "Content-Type: text/turtle" \
           --header "Accept: application/json" \
-          --data-binary @"$TMP_FILE"
-        echo " Update complete for $FILE_NAME."
-      else
+          --data-binary @"$TMP_FILE")
+
+        PUT_HTTP_CODE=$(echo "$PUT_RESPONSE" | tail -n1)
+        PUT_BODY=$(echo "$PUT_RESPONSE" | sed '$d')
+
+        if [ "$PUT_HTTP_CODE" -ge 200 ] && [ "$PUT_HTTP_CODE" -lt 300 ]; then
+          echo " Update complete for $FILE_NAME (HTTP $PUT_HTTP_CODE)."
+        else
+          echo " PUT Failed for $FILE_NAME (HTTP $PUT_HTTP_CODE)."
+          echo " Error: $PUT_BODY"
+        fi
+      elif [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
         echo " Creation complete for $FILE_NAME (HTTP $HTTP_CODE)."
+      else
+        echo " POST Failed for $FILE_NAME (HTTP $HTTP_CODE)."
+        echo " Error: $BODY"
       fi
 
       rm "$TMP_FILE"
     }
 
-    BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/main/tfds-schemas"
+    BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/feature/TFDS-schemas/tfds-schemas"
 
     # NOTE: The order is critical! Base SIMPL schemas must be loaded BEFORE TFDS extensions.
 
