@@ -1,0 +1,1331 @@
+@prefix gax-validation: <http://w3id.org/gaia-x/validation#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix simpl: <http://w3id.org/gaia-x/simpl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+gax-validation:ApplicationOfferingShape a sh:NodeShape ;
+    sh:property [ skos:example "'(a structure object of type ApplicationProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "application properties" ;
+            sh:node gax-validation:ApplicationPropertiesShape ;
+            sh:order 1 ;
+            sh:path simpl:applicationProperties ],
+        [ skos:example "'(a structure object of type ServicePolicy'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service policy" ;
+            sh:node gax-validation:ServicePolicyShape ;
+            sh:order 5 ;
+            sh:path simpl:servicePolicy ],
+        [ skos:example "'(a structure object of type ContractTemplate'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template" ;
+            sh:node gax-validation:ContractTemplateShape ;
+            sh:order 6 ;
+            sh:path simpl:contractTemplate ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'(a structure object of type EdcRegistration'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "edc registration" ;
+            sh:node gax-validation:EdcRegistrationShape ;
+            sh:order 7 ;
+            sh:path simpl:edcRegistration ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'(a structure object of type EdcConnector'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "edc connector" ;
+            sh:node gax-validation:EdcConnectorShape ;
+            sh:order 8 ;
+            sh:path simpl:edcConnector ],
+        [ skos:example "'(a structure object of type GeneralServiceProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "general service properties" ;
+            sh:node gax-validation:GeneralServicePropertiesShape ;
+            sh:order 1 ;
+            sh:path simpl:generalServiceProperties ],
+        [ skos:example "'(a structure object of type AssetProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "asset properties" ;
+            sh:node gax-validation:AssetPropertiesShape ;
+            sh:order 2 ;
+            sh:path simpl:assetProperties ],
+        [ skos:example "'(a structure object of type ProviderInformation'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provider information" ;
+            sh:node gax-validation:ProviderInformationShape ;
+            sh:order 3 ;
+            sh:path simpl:providerInformation ],
+        [ skos:example "'(a structure object of type OfferingPrice'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "offering price" ;
+            sh:node gax-validation:OfferingPriceShape ;
+            sh:order 4 ;
+            sh:path simpl:offeringPrice ] ;
+    sh:targetClass simpl:ApplicationOffering .
+
+gax-validation:DataOfferingShape a sh:NodeShape ;
+    sh:property [ skos:example "'(a structure object of type DataProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "data properties" ;
+            sh:node gax-validation:DataPropertiesShape ;
+            sh:order 1 ;
+            sh:path simpl:dataProperties ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'(a structure object of type EdcRegistration'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "edc registration" ;
+            sh:node gax-validation:EdcRegistrationShape ;
+            sh:order 7 ;
+            sh:path simpl:edcRegistration ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'(a structure object of type EdcConnector'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "edc connector" ;
+            sh:node gax-validation:EdcConnectorShape ;
+            sh:order 8 ;
+            sh:path simpl:edcConnector ],
+        [ skos:example "'(a structure object of type GeneralServiceProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "general service properties" ;
+            sh:node gax-validation:GeneralServicePropertiesShape ;
+            sh:order 1 ;
+            sh:path simpl:generalServiceProperties ],
+        [ skos:example "'(a structure object of type AssetProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "asset properties" ;
+            sh:node gax-validation:AssetPropertiesShape ;
+            sh:order 2 ;
+            sh:path simpl:assetProperties ],
+        [ skos:example "'(a structure object of type ProviderInformation'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provider information" ;
+            sh:node gax-validation:ProviderInformationShape ;
+            sh:order 3 ;
+            sh:path simpl:providerInformation ],
+        [ skos:example "'(a structure object of type OfferingPrice'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "offering price" ;
+            sh:node gax-validation:OfferingPriceShape ;
+            sh:order 4 ;
+            sh:path simpl:offeringPrice ],
+        [ skos:example "'(a structure object of type ServicePolicy'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service policy" ;
+            sh:node gax-validation:ServicePolicyShape ;
+            sh:order 5 ;
+            sh:path simpl:servicePolicy ],
+        [ skos:example "'(a structure object of type ContractTemplate'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template" ;
+            sh:node gax-validation:ContractTemplateShape ;
+            sh:order 6 ;
+            sh:path simpl:contractTemplate ] ;
+    sh:targetClass simpl:DataOffering .
+
+gax-validation:InfrastructureOfferingShape a sh:NodeShape ;
+    sh:property [ skos:example "'(a structure object of type InfrastructureProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "infrastructure properties" ;
+            sh:node gax-validation:InfrastructurePropertiesShape ;
+            sh:order 1 ;
+            sh:path simpl:infrastructureProperties ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'(a structure object of type EdcRegistration'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "edc registration" ;
+            sh:node gax-validation:EdcRegistrationShape ;
+            sh:order 7 ;
+            sh:path simpl:edcRegistration ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'(a structure object of type EdcConnector'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "edc connector" ;
+            sh:node gax-validation:EdcConnectorShape ;
+            sh:order 8 ;
+            sh:path simpl:edcConnector ],
+        [ skos:example "'(a structure object of type GeneralServiceProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "general service properties" ;
+            sh:node gax-validation:GeneralServicePropertiesShape ;
+            sh:order 1 ;
+            sh:path simpl:generalServiceProperties ],
+        [ skos:example "'(a structure object of type AssetProperties'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "asset properties" ;
+            sh:node gax-validation:AssetPropertiesShape ;
+            sh:order 2 ;
+            sh:path simpl:assetProperties ],
+        [ skos:example "'(a structure object of type ProviderInformation'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provider information" ;
+            sh:node gax-validation:ProviderInformationShape ;
+            sh:order 3 ;
+            sh:path simpl:providerInformation ],
+        [ skos:example "'(a structure object of type OfferingPrice'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "offering price" ;
+            sh:node gax-validation:OfferingPriceShape ;
+            sh:order 4 ;
+            sh:path simpl:offeringPrice ],
+        [ skos:example "'(a structure object of type ServicePolicy'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service policy" ;
+            sh:node gax-validation:ServicePolicyShape ;
+            sh:order 5 ;
+            sh:path simpl:servicePolicy ],
+        [ skos:example "'(a structure object of type ContractTemplate'" ;
+            sh:description "Basic classification of the service as per provision type and service model." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template" ;
+            sh:node gax-validation:ContractTemplateShape ;
+            sh:order 6 ;
+            sh:path simpl:contractTemplate ] ;
+    sh:targetClass simpl:InfrastructureOffering .
+
+gax-validation:ApplicationPropertiesShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Application package" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "package" ;
+            sh:order 1 ;
+            sh:path simpl:package ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.gx.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "Application link" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "link" ;
+            sh:order 2 ;
+            sh:path simpl:link ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'docker image, executable package'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "Format under which the application is distributed (e.g. docker image, executable package, ...). Might be more than one format available for the same application." ;
+            sh:name "open api" ;
+            sh:order 3 ;
+            sh:path simpl:openApi ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Target users" ;
+            sh:name "target users" ;
+            sh:order 4 ;
+            sh:path simpl:targetUsers ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Requirements on the runtime environment (useful for the deployment in the infrastructure provider)" ;
+            sh:name "requirements" ;
+            sh:order 5 ;
+            sh:path simpl:requirements ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.gx.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "URL of the documentation on how to use the application" ;
+            sh:name "url" ;
+            sh:order 6 ;
+            sh:path simpl:url ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ] ;
+    sh:targetClass simpl:ApplicationProperties .
+
+gax-validation:DataPropertiesShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'http://provenanceURL.eu'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "Provenance" ;
+            sh:maxCount 1 ;
+            sh:name "produced by" ;
+            sh:order 1 ;
+            sh:path simpl:producedBy ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'csv, xml'" ;
+            sh:datatype xsd:string ;
+            sh:description "Format under which the data is distributed (e.g. csv, xml, …)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "format" ;
+            sh:order 2 ;
+            sh:path simpl:format ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'http://mysite/swagger-ui/index.html'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "Schema of the dataset, depends on the type of data for JSON it would be JSON Schema Description that states what fields the data has and the types." ;
+            sh:name "open api" ;
+            sh:order 3 ;
+            sh:path simpl:openApi ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'http://mysite/swagger-ui/index.html'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "Additional Information about the dataset" ;
+            sh:maxCount 1 ;
+            sh:name "additional info" ;
+            sh:order 4 ;
+            sh:path simpl:additionalInfo ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Related datasets" ;
+            sh:name "related datasets" ;
+            sh:order 5 ;
+            sh:path simpl:relatedDatasets ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Target users" ;
+            sh:name "target users" ;
+            sh:order 6 ;
+            sh:path simpl:targetUsers ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Data Quality (to include metrics such as completeness, accuracy, timeliness and other)" ;
+            sh:name "data quality" ;
+            sh:order 7 ;
+            sh:path simpl:dataQuality ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Encryption: Describes the encryption algorithms and keys used to secure the data" ;
+            sh:maxCount 1 ;
+            sh:name "encryption" ;
+            sh:order 8 ;
+            sh:path simpl:encryption ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Anonymization/pseudonymization: Indicates whether sensitive information has been anonymized or pseudonymized to protect privacy" ;
+            sh:maxCount 1 ;
+            sh:name "anonymization" ;
+            sh:order 9 ;
+            sh:path simpl:anonymization ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ] ;
+    sh:targetClass simpl:DataProperties .
+
+gax-validation:InfrastructurePropertiesShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Resource Type" ;
+            sh:in ( "vm" "container" "block_storage" "object_storage" "relational_db" "document_db" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "resource type" ;
+            sh:order 4 ;
+            sh:path simpl:resourceType ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Region And Availability" ;
+            sh:in ( "eu-west-1" "eu-west-2" "eu-west-3" "eu-central-1" "eu-north-1" "eu-south-1" "eu-south-2" ) ;
+            sh:minCount 1 ;
+            sh:name "region and az" ;
+            sh:order 5 ;
+            sh:path simpl:regionAndAz ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'10'" ;
+            sh:datatype xsd:string ;
+            sh:description "Size and Capacity" ;
+            sh:maxCount 1 ;
+            sh:name "size and cap" ;
+            sh:order 6 ;
+            sh:path simpl:sizeAndCap ;
+            sh:pattern "\\d+(\\.\\d+)?\\s?(B|KB|MB|GB|TB|PB|EB|ZB|YB)" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Operating System and Image" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "os and image" ;
+            sh:order 7 ;
+            sh:path simpl:osAndImage ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Network Configuration" ;
+            sh:maxCount 1 ;
+            sh:name "network configuration" ;
+            sh:order 8 ;
+            sh:path simpl:networkConfiguration ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Security Settings" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "security settings" ;
+            sh:order 9 ;
+            sh:path simpl:securitySettings ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Instance Type" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "instance type" ;
+            sh:order 10 ;
+            sh:path simpl:instanceType ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Storage Type" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "storage type" ;
+            sh:order 11 ;
+            sh:path simpl:storageType ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Backup And Redundancy" ;
+            sh:in ( "full-backup" "incremental-backup" "differential-backup" ) ;
+            sh:maxCount 1 ;
+            sh:name "backup" ;
+            sh:order 12 ;
+            sh:path simpl:backup ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Scalability Options" ;
+            sh:in ( "dynamic-scaling" "scheduled-scaling" "sharding" ) ;
+            sh:maxCount 1 ;
+            sh:name "scalability" ;
+            sh:order 13 ;
+            sh:path simpl:scalability ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Monitoring and Logging" ;
+            sh:maxCount 1 ;
+            sh:name "monitoring" ;
+            sh:order 14 ;
+            sh:path simpl:monitoring ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Tags and Metadata" ;
+            sh:maxCount 16 ;
+            sh:maxLength 50 ;
+            sh:name "tags" ;
+            sh:order 15 ;
+            sh:path simpl:tags ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.gx.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "External Url" ;
+            sh:maxCount 1 ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "external url" ;
+            sh:order 16 ;
+            sh:path simpl:externalUrl ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Target users" ;
+            sh:name "target users" ;
+            sh:order 1 ;
+            sh:path simpl:targetUsers ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Requirements on the runtime environment (useful for the deployment in the infrastructure provider)" ;
+            sh:name "requirements" ;
+            sh:order 2 ;
+            sh:path simpl:requirements ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.gx.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "URL of the documentation on how to use the application" ;
+            sh:name "url" ;
+            sh:order 3 ;
+            sh:path simpl:url ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ] ;
+    sh:targetClass simpl:InfrastructureProperties .
+
+gax-validation:AssetPropertiesShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "requiredOnFrontendOnly" ) ;
+            skos:example "'{ 'Json' : 'Object' }'" ;
+            sh:datatype xsd:string ;
+            sh:description "Provider Data address" ;
+            sh:maxCount 1 ;
+            sh:name "provider data address" ;
+            sh:order 1 ;
+            sh:path simpl:providerDataAddress ],
+        [ simpl:configure ( "requiredOnFrontendOnly" ) ;
+            skos:example "'{ 'Json' : 'Object' }'" ;
+            sh:datatype xsd:string ;
+            sh:description "Provider Data address" ;
+            sh:maxCount 1 ;
+            sh:name "provider data address" ;
+            sh:order 1 ;
+            sh:path simpl:providerDataAddress ],
+        [ simpl:configure ( "requiredOnFrontendOnly" ) ;
+            skos:example "'{ 'Json' : 'Object' }'" ;
+            sh:datatype xsd:string ;
+            sh:description "Provider Data address" ;
+            sh:maxCount 1 ;
+            sh:name "provider data address" ;
+            sh:order 1 ;
+            sh:path simpl:providerDataAddress ] ;
+    sh:targetClass simpl:AssetProperties .
+
+gax-validation:ContractTemplateShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Contract Template 1', 'Contract Template 2'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates Contract Template Document" ;
+            sh:in ( "Contract Template 1" "Contract Template 2" "Contract Template 3" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template document" ;
+            sh:order 1 ;
+            sh:path simpl:contractTemplateDocument ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates HASH VALUE" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template hash value" ;
+            sh:order 2 ;
+            sh:path simpl:contractTemplateHashValue ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates HASH ALGORITHM" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template hash alg" ;
+            sh:order 3 ;
+            sh:path simpl:contractTemplateHashAlg ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'URL'" ;
+            sh:datatype xsd:string ;
+            sh:description "URL" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template u r l" ;
+            sh:order 4 ;
+            sh:path simpl:contractTemplateURL ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Contract Template 1', 'Contract Template 2'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates Contract Template Document" ;
+            sh:in ( "Contract Template 1" "Contract Template 2" "Contract Template 3" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template document" ;
+            sh:order 1 ;
+            sh:path simpl:contractTemplateDocument ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates HASH VALUE" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template hash value" ;
+            sh:order 2 ;
+            sh:path simpl:contractTemplateHashValue ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates HASH ALGORITHM" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template hash alg" ;
+            sh:order 3 ;
+            sh:path simpl:contractTemplateHashAlg ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'URL'" ;
+            sh:datatype xsd:string ;
+            sh:description "URL" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template u r l" ;
+            sh:order 4 ;
+            sh:path simpl:contractTemplateURL ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates HASH VALUE" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template hash value" ;
+            sh:order 2 ;
+            sh:path simpl:contractTemplateHashValue ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates HASH ALGORITHM" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template hash alg" ;
+            sh:order 3 ;
+            sh:path simpl:contractTemplateHashAlg ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'URL'" ;
+            sh:datatype xsd:string ;
+            sh:description "URL" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template u r l" ;
+            sh:order 4 ;
+            sh:path simpl:contractTemplateURL ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Contract Template 1', 'Contract Template 2'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates Contract Template Document" ;
+            sh:in ( "Contract Template 1" "Contract Template 2" "Contract Template 3" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract template document" ;
+            sh:order 1 ;
+            sh:path simpl:contractTemplateDocument ] ;
+    sh:targetClass simpl:ContractTemplate .
+
+gax-validation:EdcConnectorShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'providerEndpointURL'" ;
+            sh:datatype xsd:string ;
+            sh:description "Provider endpoint url" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provider endpoint u r l" ;
+            sh:order 1 ;
+            sh:path simpl:providerEndpointURL ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'providerEndpointURL'" ;
+            sh:datatype xsd:string ;
+            sh:description "Provider endpoint url" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provider endpoint u r l" ;
+            sh:order 1 ;
+            sh:path simpl:providerEndpointURL ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'providerEndpointURL'" ;
+            sh:datatype xsd:string ;
+            sh:description "Provider endpoint url" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provider endpoint u r l" ;
+            sh:order 1 ;
+            sh:path simpl:providerEndpointURL ] ;
+    sh:targetClass simpl:EdcConnector .
+
+gax-validation:EdcRegistrationShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of contract definition" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract definition id" ;
+            sh:order 1 ;
+            sh:path simpl:contractDefinitionId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of service policy" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service policy id" ;
+            sh:order 2 ;
+            sh:path simpl:servicePolicyId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of access policy" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "access policy id" ;
+            sh:order 3 ;
+            sh:path simpl:accessPolicyId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of asset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "asset id" ;
+            sh:order 4 ;
+            sh:path simpl:assetId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of contract definition" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract definition id" ;
+            sh:order 1 ;
+            sh:path simpl:contractDefinitionId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of service policy" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service policy id" ;
+            sh:order 2 ;
+            sh:path simpl:servicePolicyId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of access policy" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "access policy id" ;
+            sh:order 3 ;
+            sh:path simpl:accessPolicyId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of asset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "asset id" ;
+            sh:order 4 ;
+            sh:path simpl:assetId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of contract definition" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contract definition id" ;
+            sh:order 1 ;
+            sh:path simpl:contractDefinitionId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of service policy" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service policy id" ;
+            sh:order 2 ;
+            sh:path simpl:servicePolicyId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of access policy" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "access policy id" ;
+            sh:order 3 ;
+            sh:path simpl:accessPolicyId ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Identifier'" ;
+            sh:datatype xsd:string ;
+            sh:description "Unique identifier of asset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "asset id" ;
+            sh:order 4 ;
+            sh:path simpl:assetId ] ;
+    sh:targetClass simpl:EdcRegistration .
+
+gax-validation:GeneralServicePropertiesShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Title'" ;
+            sh:datatype xsd:string ;
+            sh:description "A short text title for the dataset/application/infrastructure" ;
+            sh:maxCount 1 ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "name" ;
+            sh:order 1 ;
+            sh:path simpl:name ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Description'" ;
+            sh:datatype xsd:string ;
+            sh:description "A description for the dataset/application/infrastructure" ;
+            sh:maxCount 1 ;
+            sh:maxLength 1000 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "description" ;
+            sh:order 2 ;
+            sh:path simpl:description ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'URL, handle'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "The location where the dataset/application/infrastructure can be found (likely an endpoint URL)" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service access point" ;
+            sh:order 3 ;
+            sh:path simpl:serviceAccessPoint ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Keywords'" ;
+            sh:datatype xsd:string ;
+            sh:description "Keywords" ;
+            sh:maxCount 16 ;
+            sh:maxLength 50 ;
+            sh:minLength 1 ;
+            sh:name "keywords" ;
+            sh:order 4 ;
+            sh:path simpl:keywords ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'EN, IT'" ;
+            sh:datatype xsd:string ;
+            sh:description "Language (of the metadata, like the title, description)" ;
+            sh:in ( "bg" "hr" "cs" "da" "nl" "en" "et" "fi" "fr" "de" "el" "hu" "ga" "it" "lv" "lt" "mt" "pl" "pt" "ro" "sk" "sl" "es" "sv" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "in language" ;
+            sh:order 5 ;
+            sh:path simpl:inLanguage ],
+        [ simpl:configure ( "hiddenInFrontend" "useForAdvancedSearch" ) ;
+            skos:example "'application, data, infrastructure'" ;
+            sh:datatype xsd:string ;
+            sh:description "Offering type using for search" ;
+            sh:in ( "application" "data" "infrastructure" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "offering type" ;
+            sh:order 6 ;
+            sh:path simpl:offeringType ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Id'" ;
+            sh:datatype xsd:string ;
+            sh:description "Sharing Method Id type using for Resource Address Template" ;
+            sh:maxCount 1 ;
+            sh:name "sharing method id" ;
+            sh:order 7 ;
+            sh:path simpl:sharingMethodId ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Description'" ;
+            sh:datatype xsd:string ;
+            sh:description "A description for the dataset/application/infrastructure" ;
+            sh:maxCount 1 ;
+            sh:maxLength 1000 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "description" ;
+            sh:order 2 ;
+            sh:path simpl:description ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'URL, handle'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "The location where the dataset/application/infrastructure can be found (likely an endpoint URL)" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service access point" ;
+            sh:order 3 ;
+            sh:path simpl:serviceAccessPoint ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Keywords'" ;
+            sh:datatype xsd:string ;
+            sh:description "Keywords" ;
+            sh:maxCount 16 ;
+            sh:maxLength 50 ;
+            sh:minLength 1 ;
+            sh:name "keywords" ;
+            sh:order 4 ;
+            sh:path simpl:keywords ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'EN, IT'" ;
+            sh:datatype xsd:string ;
+            sh:description "Language (of the metadata, like the title, description)" ;
+            sh:in ( "bg" "hr" "cs" "da" "nl" "en" "et" "fi" "fr" "de" "el" "hu" "ga" "it" "lv" "lt" "mt" "pl" "pt" "ro" "sk" "sl" "es" "sv" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "in language" ;
+            sh:order 5 ;
+            sh:path simpl:inLanguage ],
+        [ simpl:configure ( "hiddenInFrontend" "useForAdvancedSearch" ) ;
+            skos:example "'application, data, infrastructure'" ;
+            sh:datatype xsd:string ;
+            sh:description "Offering type using for search" ;
+            sh:in ( "application" "data" "infrastructure" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "offering type" ;
+            sh:order 6 ;
+            sh:path simpl:offeringType ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Id'" ;
+            sh:datatype xsd:string ;
+            sh:description "Sharing Method Id type using for Resource Address Template" ;
+            sh:maxCount 1 ;
+            sh:name "sharing method id" ;
+            sh:order 7 ;
+            sh:path simpl:sharingMethodId ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Title'" ;
+            sh:datatype xsd:string ;
+            sh:description "A short text title for the dataset/application/infrastructure" ;
+            sh:maxCount 1 ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "name" ;
+            sh:order 1 ;
+            sh:path simpl:name ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Description'" ;
+            sh:datatype xsd:string ;
+            sh:description "A description for the dataset/application/infrastructure" ;
+            sh:maxCount 1 ;
+            sh:maxLength 1000 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "description" ;
+            sh:order 2 ;
+            sh:path simpl:description ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'URL, handle'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "The location where the dataset/application/infrastructure can be found (likely an endpoint URL)" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "service access point" ;
+            sh:order 3 ;
+            sh:path simpl:serviceAccessPoint ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Keywords'" ;
+            sh:datatype xsd:string ;
+            sh:description "Keywords" ;
+            sh:maxCount 16 ;
+            sh:maxLength 50 ;
+            sh:minLength 1 ;
+            sh:name "keywords" ;
+            sh:order 4 ;
+            sh:path simpl:keywords ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'EN, IT'" ;
+            sh:datatype xsd:string ;
+            sh:description "Language (of the metadata, like the title, description)" ;
+            sh:in ( "bg" "hr" "cs" "da" "nl" "en" "et" "fi" "fr" "de" "el" "hu" "ga" "it" "lv" "lt" "mt" "pl" "pt" "ro" "sk" "sl" "es" "sv" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "in language" ;
+            sh:order 5 ;
+            sh:path simpl:inLanguage ],
+        [ simpl:configure ( "hiddenInFrontend" "useForAdvancedSearch" ) ;
+            skos:example "'application, data, infrastructure'" ;
+            sh:datatype xsd:string ;
+            sh:description "Offering type using for search" ;
+            sh:in ( "application" "data" "infrastructure" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "offering type" ;
+            sh:order 6 ;
+            sh:path simpl:offeringType ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'Id'" ;
+            sh:datatype xsd:string ;
+            sh:description "Sharing Method Id type using for Resource Address Template" ;
+            sh:maxCount 1 ;
+            sh:name "sharing method id" ;
+            sh:order 7 ;
+            sh:path simpl:sharingMethodId ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Title'" ;
+            sh:datatype xsd:string ;
+            sh:description "A short text title for the dataset/application/infrastructure" ;
+            sh:maxCount 1 ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "name" ;
+            sh:order 1 ;
+            sh:path simpl:name ;
+            sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" ] ;
+    sh:targetClass simpl:GeneralServiceProperties .
+
+gax-validation:OfferingPriceShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.simpl.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "URL to the used license" ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "license" ;
+            sh:order 1 ;
+            sh:path simpl:license ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'BGN, EUR, CZK'" ;
+            sh:datatype xsd:string ;
+            sh:description "Price and conditions" ;
+            sh:in ( "BGN" "EUR" "CZK" "DKK" "HUF" "PLN" "RON" "SEK" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "currency" ;
+            sh:order 2 ;
+            sh:path simpl:currency ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'0, 1, 2'" ;
+            sh:datatype xsd:decimal ;
+            sh:description "Price and conditions" ;
+            sh:maxCount 1 ;
+            sh:maxInclusive 99999999999.0 ;
+            sh:minCount 1 ;
+            sh:minInclusive 0.0 ;
+            sh:name "price" ;
+            sh:order 3 ;
+            sh:path simpl:price ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'free, commercial'" ;
+            sh:datatype xsd:string ;
+            sh:description "Price Type" ;
+            sh:in ( "free" "commercial" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "price type" ;
+            sh:order 4 ;
+            sh:path simpl:priceType ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'0, 1, 2'" ;
+            sh:datatype xsd:decimal ;
+            sh:description "Price and conditions" ;
+            sh:maxCount 1 ;
+            sh:maxInclusive 99999999999.0 ;
+            sh:minCount 1 ;
+            sh:minInclusive 0.0 ;
+            sh:name "price" ;
+            sh:order 3 ;
+            sh:path simpl:price ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'free, commercial'" ;
+            sh:datatype xsd:string ;
+            sh:description "Price Type" ;
+            sh:in ( "free" "commercial" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "price type" ;
+            sh:order 4 ;
+            sh:path simpl:priceType ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.simpl.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "URL to the used license" ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "license" ;
+            sh:order 1 ;
+            sh:path simpl:license ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'BGN, EUR, CZK'" ;
+            sh:datatype xsd:string ;
+            sh:description "Price and conditions" ;
+            sh:in ( "BGN" "EUR" "CZK" "DKK" "HUF" "PLN" "RON" "SEK" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "currency" ;
+            sh:order 2 ;
+            sh:path simpl:currency ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'0, 1, 2'" ;
+            sh:datatype xsd:decimal ;
+            sh:description "Price and conditions" ;
+            sh:maxCount 1 ;
+            sh:maxInclusive 99999999999.0 ;
+            sh:minCount 1 ;
+            sh:minInclusive 0.0 ;
+            sh:name "price" ;
+            sh:order 3 ;
+            sh:path simpl:price ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'free, commercial'" ;
+            sh:datatype xsd:string ;
+            sh:description "Price Type" ;
+            sh:in ( "free" "commercial" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "price type" ;
+            sh:order 4 ;
+            sh:path simpl:priceType ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'www.simpl.com'" ;
+            sh:datatype xsd:anyURI ;
+            sh:description "URL to the used license" ;
+            sh:maxLength 255 ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:name "license" ;
+            sh:order 1 ;
+            sh:path simpl:license ;
+            sh:pattern "^([Hh][Tt][Tt][Pp][Ss]?):\\/\\/(?:www\\.)?[A-Za-z0-9][-A-Za-z0-9@:%_\\+~#=\\.]{0,255}\\.[A-Za-z0-9()]{1,6}\\b(?:[-A-Za-z0-9()@:%_\\+.~#?&/=]*)$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'BGN, EUR, CZK'" ;
+            sh:datatype xsd:string ;
+            sh:description "Price and conditions" ;
+            sh:in ( "BGN" "EUR" "CZK" "DKK" "HUF" "PLN" "RON" "SEK" ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "currency" ;
+            sh:order 2 ;
+            sh:path simpl:currency ] ;
+    sh:targetClass simpl:OfferingPrice .
+
+gax-validation:ProviderInformationShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'123'" ;
+            sh:datatype xsd:string ;
+            sh:description "A reference to ID of the dataset/application/infrastructure provider" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provided by" ;
+            sh:order 1 ;
+            sh:path simpl:providedBy ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'support'" ;
+            sh:datatype xsd:string ;
+            sh:description "Who to contact in case of questions/issues" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contact" ;
+            sh:order 2 ;
+            sh:path simpl:contact ;
+            sh:pattern "^[\\w\\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'signature'" ;
+            sh:datatype xsd:string ;
+            sh:description "A digital signature that ensures that the provider is the one that uploaded the Self-description" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "signature" ;
+            sh:order 3 ;
+            sh:path simpl:signature ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'123'" ;
+            sh:datatype xsd:string ;
+            sh:description "A reference to ID of the dataset/application/infrastructure provider" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provided by" ;
+            sh:order 1 ;
+            sh:path simpl:providedBy ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'support'" ;
+            sh:datatype xsd:string ;
+            sh:description "Who to contact in case of questions/issues" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contact" ;
+            sh:order 2 ;
+            sh:path simpl:contact ;
+            sh:pattern "^[\\w\\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'signature'" ;
+            sh:datatype xsd:string ;
+            sh:description "A digital signature that ensures that the provider is the one that uploaded the Self-description" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "signature" ;
+            sh:order 3 ;
+            sh:path simpl:signature ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ],
+        [ simpl:configure ( "hiddenInFrontend" ) ;
+            skos:example "'123'" ;
+            sh:datatype xsd:string ;
+            sh:description "A reference to ID of the dataset/application/infrastructure provider" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "provided by" ;
+            sh:order 1 ;
+            sh:path simpl:providedBy ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'support'" ;
+            sh:datatype xsd:string ;
+            sh:description "Who to contact in case of questions/issues" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "contact" ;
+            sh:order 2 ;
+            sh:path simpl:contact ;
+            sh:pattern "^[\\w\\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'signature'" ;
+            sh:datatype xsd:string ;
+            sh:description "A digital signature that ensures that the provider is the one that uploaded the Self-description" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:name "signature" ;
+            sh:order 3 ;
+            sh:path simpl:signature ;
+            sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" ] ;
+    sh:targetClass simpl:ProviderInformation .
+
+gax-validation:ServicePolicyShape a sh:NodeShape ;
+    sh:property [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'ODRL policy'" ;
+            sh:datatype xsd:string ;
+            sh:description "Access policy to define who can access the dataset" ;
+            sh:minCount 1 ;
+            sh:name "access-policy" ;
+            sh:order 1 ;
+            sh:path simpl:access-policy ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'ODRL policy'" ;
+            sh:datatype xsd:string ;
+            sh:description "Usage policy to define how a dataset can be used" ;
+            sh:minCount 1 ;
+            sh:name "usage-policy" ;
+            sh:order 2 ;
+            sh:path simpl:usage-policy ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates compliance with relevant data protection regulations and standards" ;
+            sh:name "data protection regime" ;
+            sh:order 3 ;
+            sh:path simpl:dataProtectionRegime ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'ODRL policy'" ;
+            sh:datatype xsd:string ;
+            sh:description "Access policy to define who can access the dataset" ;
+            sh:minCount 1 ;
+            sh:name "access-policy" ;
+            sh:order 1 ;
+            sh:path simpl:access-policy ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'ODRL policy'" ;
+            sh:datatype xsd:string ;
+            sh:description "Usage policy to define how a dataset can be used" ;
+            sh:minCount 1 ;
+            sh:name "usage-policy" ;
+            sh:order 2 ;
+            sh:path simpl:usage-policy ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates compliance with relevant data protection regulations and standards" ;
+            sh:name "data protection regime" ;
+            sh:order 3 ;
+            sh:path simpl:dataProtectionRegime ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'ODRL policy'" ;
+            sh:datatype xsd:string ;
+            sh:description "Access policy to define who can access the dataset" ;
+            sh:minCount 1 ;
+            sh:name "access-policy" ;
+            sh:order 1 ;
+            sh:path simpl:access-policy ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'ODRL policy'" ;
+            sh:datatype xsd:string ;
+            sh:description "Usage policy to define how a dataset can be used" ;
+            sh:minCount 1 ;
+            sh:name "usage-policy" ;
+            sh:order 2 ;
+            sh:path simpl:usage-policy ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ],
+        [ simpl:configure ( "useForAdvancedSearch" ) ;
+            skos:example "'Free text'" ;
+            sh:datatype xsd:string ;
+            sh:description "Indicates compliance with relevant data protection regulations and standards" ;
+            sh:name "data protection regime" ;
+            sh:order 3 ;
+            sh:path simpl:dataProtectionRegime ;
+            sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" ] ;
+    sh:targetClass simpl:ServicePolicy .
+

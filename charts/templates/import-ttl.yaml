@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,49 +7,100 @@ metadata:
 data:
   import-ttl.sh: |
     #!/bin/bash
-
-    # Exit on error
     set -e
 
-    # Usage check
+    # ======================================================================================
+    # TFDS SCHEMA LOADER (Smart POST-then-PUT)
+    #
+    # Why this script exists:
+    # 1. Idempotency: The XFSC Federated Catalogue strictly uses POST for creating schemas
+    #    and PUT for updating them. If we only POST, future Helm upgrades/syncs will fail
+    #    with a "conflict_error" (Schema redefines existing terms). This script handles both.
+    # 2. Separation of Concerns: We split the schemas into 4 files (SIMPL Base + TFDS Ext)
+    #    so we can target the exact schema IDs (namespaces) required by the PUT API.
+    # 3. Complete GitOps Control: All files are pulled directly from our Github repository,
+    #    insulating us from upstream breaking changes.
+    # ======================================================================================
+
     if [ -z "$1" ]; then
       echo "Usage: $0 <ENDPOINT_URL>"
       exit 1
     fi
 
-    # Get the endpoint from the first argument
     ENDPOINT_URL="$1"
-    SCHEMA_PATH="/schemas"
 
     # Healthcheck
-    until curl -s --head --fail "$1/schemas" >/dev/null; do echo "Waiting for endpoint to become available..."; sleep 5; done
+    until curl -s --head --fail "${ENDPOINT_URL}/schemas" >/dev/null; do
+      echo "Waiting for endpoint to become available..."; sleep 5;
+    done
 
-    # Raw file URLs
-    FILE1_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/feature/pre-release-S23/yaml2ontology/simpl_ontology_generated.ttl"
-    FILE2_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/feature/pre-release-S23/yaml2shape/merged-shapes.ttl"
+    # Function to properly URL encode strings (POSIX safe, no jq required)
+    urlencode() {
+        local length="${#1}"
+        for (( i = 0; i < length; i++ )); do
+            local c="${1:i:1}"
+            case $c in
+                [a-zA-Z0-9.~_-]) printf "$c" ;;
+                *) printf '%%%02X' "'$c" ;;
+            esac
+        done
+    }
 
-    # Temporary files
-    TMP1=$(mktemp)
-    TMP2=$(mktemp)
+    # Smart loader function
+    load_schema() {
+      local FILE_URL=$1
+      local SCHEMA_ID=$2
+      local FILE_NAME=$(basename "$FILE_URL")
+      local TMP_FILE=$(mktemp)
 
-    # Download the files
-    curl -sSL "$FILE1_URL" -o "$TMP1"
-    curl -sSL "$FILE2_URL" -o "$TMP2"
+      echo "--------------------------------------------------------"
+      echo "Downloading $FILE_NAME..."
+      curl -sSL "$FILE_URL" -o "$TMP_FILE"
 
-    # POST the first file
-    curl --location "${ENDPOINT_URL}${SCHEMA_PATH}" \
-      --header "Content-Type: text/turtle" \
-      --header "Accept: application/json" \
-      --data-binary @"$TMP1"
+      echo "Attempting to create (POST) $FILE_NAME..."
+      RESPONSE=$(curl -s -w "\n%{http_code}" --location "${ENDPOINT_URL}/schemas" \
+        --header "Content-Type: text/turtle" \
+        --header "Accept: application/json" \
+        --data-binary @"$TMP_FILE")
 
-    # POST the second file
-    curl --location "${ENDPOINT_URL}${SCHEMA_PATH}" \
-      --header "Content-Type: text/turtle" \
-      --header "Accept: application/json" \
-      --data-binary @"$TMP2"
+      HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+      BODY=$(echo "$RESPONSE" | sed '$d')
 
-    # Clean up
-    rm "$TMP1" "$TMP2"
+      if [[ "$BODY" == *"conflict_error"* ]] || [[ "$BODY" == *"Schema redefines existing terms"* ]]; then
+        echo "Schema already exists. Falling back to update (PUT)..."
+        ENCODED_ID=$(urlencode "$SCHEMA_ID")
+
+        curl -s --location "${ENDPOINT_URL}/schemas/${ENCODED_ID}" \
+          --request PUT \
+          --header "Content-Type: text/turtle" \
+          --header "Accept: application/json" \
+          --data-binary @"$TMP_FILE"
+        echo " Update complete for $FILE_NAME."
+      else
+        echo " Creation complete for $FILE_NAME (HTTP $HTTP_CODE)."
+      fi
+
+      rm "$TMP_FILE"
+    }
+
+    BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/main/tfds-schemas"
+
+    # NOTE: The order is critical! Base SIMPL schemas must be loaded BEFORE TFDS extensions.
+
+    # 1. Base SIMPL Ontology
+    load_schema "${BASE_RAW_URL}/ontology/simpl_ontology.ttl" "https://w3id.org/simpl#"
+
+    # 2. Base SIMPL Shapes
+    load_schema "${BASE_RAW_URL}/shape/simpl_shapes.ttl" "https://w3id.org/simpl#"
+
+    # 3. TFDS Extended Ontology
+    load_schema "${BASE_RAW_URL}/ontology/tfds_ontology.ttl" "https://trafficflowdataspace.eu/ontology#"
+
+    # 4. TFDS Extended Shapes
+    load_schema "${BASE_RAW_URL}/shape/tfds_shapes.ttl" "https://trafficflowdataspace.eu/ontology#"
+
+    echo "--------------------------------------------------------"
+    echo "All schemas successfully processed."
 
 ---
 apiVersion: batch/v1
