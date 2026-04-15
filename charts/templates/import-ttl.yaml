@@ -1,4 +1,3 @@
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,42 +6,36 @@ metadata:
 data:
   import-ttl.sh: |
     #!/bin/sh
-
-    # Exit on error
     set -e
 
     # ======================================================================================
-    # TFDS SCHEMA LOADER (Smart POST-then-PUT)
+    # TFDS SCHEMA SEEDER (POST-Only)
     #
-    # Why this script exists:
-    # 1. Idempotency: The XFSC Federated Catalogue strictly uses POST for creating schemas
-    #    and PUT for updating them. If we only POST, future Helm upgrades/syncs will fail
-    #    with a "conflict_error" (Schema redefines existing terms). This script handles both.
-    # 2. Separation of Concerns: We split the schemas into 4 files (SIMPL Base + TFDS Ext)
-    #    so we can target the exact schema IDs (namespaces) required by the PUT API.
-    # 3. Complete GitOps Control: All files are pulled directly from our Github repository,
-    #    insulating us from upstream breaking changes.
+    # Architecture Decision: 
+    # Ontologies are foundational. Dynamically updating schemas (via PUT) risks breaking
+    # existing data offerings across the federation. 
+    # Therefore, this script acts purely as an idempotent database seeder. 
+    # It attempts to CREATE (POST) the schemas. If the Federated Catalogue returns a 
+    # "conflict_error" (meaning the schema already exists), it assumes success and safely 
+    # skips to the next file without overwriting.
     # ======================================================================================
 
-    # Usage check
     if [ -z "$1" ]; then
       echo "Usage: $0 <ENDPOINT_URL>"
       exit 1
     fi
 
-    # Get the endpoint from the first argument
     ENDPOINT_URL="$1"
     SCHEMA_PATH="/schemas"
 
     # Healthcheck
-    until curl -s --head --fail "${ENDPOINT_URL}/schemas" >/dev/null; do
-      echo "Waiting for endpoint to become available..."; sleep 5;
+    until curl -s --head --fail "${ENDPOINT_URL}/schemas" >/dev/null; do 
+      echo "Waiting for endpoint to become available..."; sleep 5; 
     done
 
-    # Smart loader function
-    load_schema() {
+    # Safe seeder function
+    seed_schema() {
       local FILE_URL=$1
-      local SCHEMA_ID=$2
       local FILE_NAME=$(basename "$FILE_URL")
       local TMP_FILE=$(mktemp)
 
@@ -55,60 +48,41 @@ data:
         --header "Content-Type: text/turtle" \
         --header "Accept: application/json" \
         --data-binary @"$TMP_FILE")
-
+      
       HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
       BODY=$(echo "$RESPONSE" | sed '$d')
 
       if echo "$BODY" | grep -q "conflict_error" || echo "$BODY" | grep -q "Schema redefines existing terms"; then
-        echo "Schema already exists. Falling back to update (PUT)..."
-
-        # URL Encode the schema ID using sed (Alpine/POSIX compatible)
-        # Replaces ':', '/', and '#' with their percent-encoded equivalents
-        ENCODED_ID=$(echo "$SCHEMA_ID" | sed 's/:/%3A/g' | sed 's/\//%2F/g' | sed 's/#/%23/g')
-
-        PUT_RESPONSE=$(curl -s -w "\n%{http_code}" --location "${ENDPOINT_URL}${SCHEMA_PATH}/${ENCODED_ID}" \
-          --request PUT \
-          --header "Content-Type: text/turtle" \
-          --header "Accept: application/json" \
-          --data-binary @"$TMP_FILE")
-
-        PUT_HTTP_CODE=$(echo "$PUT_RESPONSE" | tail -n1)
-        PUT_BODY=$(echo "$PUT_RESPONSE" | sed '$d')
-
-        if [ "$PUT_HTTP_CODE" -ge 200 ] && [ "$PUT_HTTP_CODE" -lt 300 ]; then
-          echo " Update complete for $FILE_NAME (HTTP $PUT_HTTP_CODE)."
-        else
-          echo " PUT Failed for $FILE_NAME (HTTP $PUT_HTTP_CODE)."
-          echo " Error: $PUT_BODY"
-        fi
+        echo " Success: Schema already exists in catalogue. Skipping creation."
       elif [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
-        echo " Creation complete for $FILE_NAME (HTTP $HTTP_CODE)."
+        echo " Success: Creation complete for $FILE_NAME (HTTP $HTTP_CODE)."
       else
-        echo " POST Failed for $FILE_NAME (HTTP $HTTP_CODE)."
+        echo " FAILED to create $FILE_NAME (HTTP $HTTP_CODE)."
         echo " Error: $BODY"
+        # We don't exit the script here so we can see all errors at once if multiple fail
       fi
-
+      
       rm "$TMP_FILE"
     }
 
     BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/feature/TFDS-schemas/tfds-schemas"
-
+    
     # NOTE: The order is critical! Base SIMPL schemas must be loaded BEFORE TFDS extensions.
-
+    
     # 1. Base SIMPL Ontology
-    load_schema "${BASE_RAW_URL}/ontology/simpl_ontology.ttl" "https://w3id.org/simpl#"
-
+    seed_schema "${BASE_RAW_URL}/ontology/simpl_ontology.ttl"
+    
     # 2. Base SIMPL Shapes
-    load_schema "${BASE_RAW_URL}/shape/simpl_shapes.ttl" "https://w3id.org/simpl#"
-
+    seed_schema "${BASE_RAW_URL}/shape/simpl_shapes.ttl"
+    
     # 3. TFDS Extended Ontology
-    load_schema "${BASE_RAW_URL}/ontology/tfds_ontology.ttl" "https://trafficflowdataspace.eu/ontology#"
-
+    seed_schema "${BASE_RAW_URL}/ontology/tfds_ontology.ttl"
+    
     # 4. TFDS Extended Shapes
-    load_schema "${BASE_RAW_URL}/shape/tfds_shapes.ttl" "https://trafficflowdataspace.eu/ontology#"
+    seed_schema "${BASE_RAW_URL}/shape/tfds_shapes.ttl"
 
     echo "--------------------------------------------------------"
-    echo "All schemas successfully processed."
+    echo "All schemas processed."
 
 ---
 apiVersion: batch/v1

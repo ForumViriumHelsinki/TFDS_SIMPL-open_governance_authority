@@ -1,9 +1,13 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix tfds: <https://trafficflowdataspace.eu/ontology#> .
-@prefix simpl: <https://w3id.org/simpl#> . 
+@prefix tfds: <http://trafficflowdataspace.eu/ontology#> .
+@prefix simpl: <http://w3id.org/gaia-x/simpl#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+
+<http://trafficflowdataspace.eu/ontology#> a owl:Ontology ;
+    rdfs:label "TFDS Custom Ontology" ;
+    rdfs:comment "Extensions for the Traffic Flow Data Space" .
 
 # ----------------------------------------------------------------------
 # TFDS Specific Ontology Definitions
