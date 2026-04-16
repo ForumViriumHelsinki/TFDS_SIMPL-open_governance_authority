@@ -91,7 +91,9 @@ data:
 
     echo "-> Downloading Signed Credential..."
     curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
-    -o "$CERT_FILE"
+    -o "$CERT_FILE" || {
+      echo "   ⚠️ WARNING: Failed to download signed credential."
+    }
 
     echo "-> Uploading Signed Credential to Authentication Provider..."
     CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
