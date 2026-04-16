@@ -92,9 +92,9 @@ metadata:
   name: import-ttl-job
   annotations:
     "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   backoffLimit: 12
-  ttlSecondsAfterFinished: 300
   template:
     metadata:
       annotations:

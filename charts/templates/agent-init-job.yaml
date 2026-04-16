@@ -6,7 +6,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "-5"
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation
 data:
   init.sh: |
     #!/bin/sh
@@ -71,14 +71,19 @@ data:
     --data-raw "{
       \"organization\": \"$ORG_NAME\",
       \"participantType\": \"$PARTICIPANT_TYPE\"
-    }" | sed -E 's/^"(.*)"$/\1/') || echo "   (Participant may already exist)"
-    
-    if [ -z "$PARTICIPANT_ID" ]; then
-      echo "   Retrieving existing Participant ID..."
+    }" | sed -E 's/^"(.*)"$/\1/') || {
+      echo ""
+      echo "   ⚠️ WARNING: Participant creation failed (Likely already exists)."
+      echo "   Retrieving existing Participant ID instead..."
       # Fallback to get existing if recreation failed (Assuming first participant is the authority)
       PARTICIPANT_ID=$(curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p' | head -n 1)
+      echo "   Found existing Participant ID: $PARTICIPANT_ID"
+      echo ""
+    }
+    
+    if [ -n "$PARTICIPANT_ID" ]; then
+      echo "   Active Participant ID: $PARTICIPANT_ID"
     fi
-    echo "   Participant ID: $PARTICIPANT_ID"
 
     echo "-> Uploading CSR to Identity Provider..."
     curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
@@ -108,7 +113,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
     metadata:
