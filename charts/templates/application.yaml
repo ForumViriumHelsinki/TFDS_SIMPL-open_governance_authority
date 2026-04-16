@@ -807,16 +807,17 @@ spec:
         resources: {{- toYaml .Values.identity_provider.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.auth_provider.projectID }}/packages/helm/stable"
-    path: ''
-    targetRevision: {{ .Values.auth_provider.targetRevision }}
-    chart: {{ .Values.auth_provider.chart_name }}
+  - repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authentication_provider.git"
+    path: 'charts'
+    targetRevision: HEAD
     helm:
       valueFiles:
         {{- range .Values.auth_provider.valueFiles }}
         - $values/app-values/auth-provider/{{ . }}
         {{- end }}
       values: |
+        image:
+          tag: "{{ .Values.auth_provider.targetRevision }}"
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}

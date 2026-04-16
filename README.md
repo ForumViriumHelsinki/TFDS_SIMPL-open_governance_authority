@@ -1,5 +1,14 @@
 # TFDS SIMPL-open Governance Authority Agent
 
+> **Notice: TFDS Project Fork**
+> This repository is a GitOps-optimized fork maintained by the TFDS Project. 
+> 
+> **Modifications:**
+> - Integrated an automated `singleNode` toggle to adapt the multi-IP LoadBalancer architecture for single-IP environments (like k3s) by converting services to `ClusterIP` and dynamically injecting raw TCP/SSL-passthrough routing rules.
+> - Substituted upstream dependencies (e.g., the Authentication Provider) with TFDS-maintained GitOps forks to eliminate declarative synchronization drift in ArgoCD caused by dynamically generated Job names.
+>
+> *The core SIMPL applications are unmodified and dynamically pulled from official registries.*
+
 This repository contains the deployment manifests and configurations for the **SIMPL-Open Governance Authority** agent. It supports both standard distributed deployments and an **optional local, single-node deployment mode** (e.g., for k3s environments).
 
 ## 🚀 Deployment Guide
@@ -97,3 +106,14 @@ This repository is designed to act as a template. If your data space requires fu
 
 1. **Update the Download URLs:** Edit `charts/templates/import-ttl.yaml` to point the `BASE_RAW_URL` to your own Git repository containing your custom compiled `.ttl` extension files.
 2. **Air-gapped Environments:** If your cluster does not have outbound internet access, you must modify `import-ttl.yaml` to mount the `.ttl` files directly into the Job via a Kubernetes `ConfigMap` rather than downloading them live over the internet.
+
+#### Validating schema insertion.
+
+```shell
+curl -s -X GET "http://localhost:8081/schemas" -H "Accept: application/json" | jq '{
+    "ontologies_count": (.ontologies | length),
+    "ontologies": .ontologies,
+    "shapes_count": (.shapes | length),
+    "shapes": .shapes
+}'
+```
