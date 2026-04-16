@@ -49,7 +49,15 @@ Open this file and verify or update the `values` block to match your environment
    domainSuffix: ds.helsinki.tfds.io  # Your local cluster's base domain
    ```
 
-4. **Monitoring:** Configure the logging and metrics integration:
+4. **Organization and Initialization:** These variables are injected directly into the automated `agent-init-job` to dynamically configure your cryptographic identity. They must reflect your data space's exact organizational structure.
+   ```yaml
+   organization:
+     name: "FVH"                      # The primary name of your organization
+     unit: "Data"                     # The specific organizational unit
+     country: "FI"                    # The two-letter ISO country code
+   ```
+
+5. **Monitoring:** Configure the logging and metrics integration:
    ```yaml
    monitoring:
      enabled: false                   # Disable if you are not running the Common monitoring stack
@@ -117,3 +125,19 @@ curl -s -X GET "http://localhost:8081/schemas" -H "Accept: application/json" | j
     "shapes": .shapes
 }'
 ```
+
+---
+
+### Automated Agent Initialization (Post-Install)
+
+Once the Governance Authority stack is fully deployed and the backend APIs (Authentication Provider and Identity Provider) are healthy, the cluster must automatically initialize its own cryptographic identity (Keypairs, CSRs, and signed Credentials) to participate in the data space.
+
+In this repository, **this initialization is 100% automated.**
+
+An ephemeral Kubernetes Job (`agent-init-job`) is deployed via ArgoCD as a Helm `post-install` / `post-upgrade` hook. It handles the entire SIMPL identity bootstrap process without any manual scripts required.
+
+#### How it Works:
+1. **Dynamic Configuration:** The Job reads the organizational parameters (`organization.name`, `organization.unit`, `organization.country`, and `domainSuffix`) directly from the top-level `ArgoCD/governance_authority_manifest.yaml`.
+2. **Robust Polling:** The script pings the internal Spring Boot APIs until they return valid HTTP responses, ensuring it never attempts to create credentials before the databases are ready.
+3. **Idempotent Execution:** The workflow is perfectly safe to run multiple times. If the Job executes during a routine ArgoCD sync and the Participant or Keypair already exists, the script catches the HTTP conflict, prints an informative `(Keypair may already exist)` message to the logs, retrieves the existing IDs, and continues safely.
+4. **Self-Cleaning:** Once the initialization completes successfully, the Job pod automatically deletes itself from the cluster (`hook-succeeded`), keeping your namespace clean.

@@ -10,6 +10,11 @@ namespaceTag:
   authority: ${AUTHNAMESPACETAG}
   common: ${COMMONSPACETAG}
 
+organization:
+  name: ${ORG_NAME}
+  unit: ${ORG_UNIT}
+  country: ${ORG_COUNTRY}
+
 resourcePreset: default
 # resourcePreset: low
 
