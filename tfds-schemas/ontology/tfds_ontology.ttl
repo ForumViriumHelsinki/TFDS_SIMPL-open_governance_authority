@@ -1,0 +1,35 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix tfds: <http://trafficflowdataspace.eu/ontology#> .
+@prefix simpl: <http://w3id.org/gaia-x/simpl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<http://trafficflowdataspace.eu/ontology#> a owl:Ontology ;
+    rdfs:label "TFDS Custom Ontology" ;
+    rdfs:comment "Extensions for the Traffic Flow Data Space" .
+
+# ----------------------------------------------------------------------
+# TFDS Specific Ontology Definitions
+# (Extends simpl:DataOffering)
+# ----------------------------------------------------------------------
+
+tfds:TrafficFlowDataOffering a owl:Class ;
+    rdfs:label "Traffic Flow Data Offering"@en ;
+    rdfs:comment "A Data Offering specifically for traffic flow data, mandating DATEX II compliance."@en ;
+    rdfs:subClassOf simpl:DataOffering .
+
+tfds:TrafficDisturbanceDataOffering a owl:Class ;
+    rdfs:label "Traffic Disturbance Data Offering"@en ;
+    rdfs:comment "A Data Offering specifically for traffic disturbance data, mandating DATEX II compliance."@en ;
+    rdfs:subClassOf simpl:DataOffering .
+
+tfds:IdeaValidationDataOffering a owl:Class ;
+    rdfs:label "IDEA Validation Data Offering"@en ;
+    rdfs:comment "A Data Offering specifically for IDEA algorithm validation data, mandating DATEX II compliance."@en ;
+    rdfs:subClassOf simpl:DataOffering .
+
+tfds:AirQualityDataOffering a owl:Class ;
+    rdfs:label "Air Quality Data Offering"@en ;
+    rdfs:comment "A Data Offering specifically for air quality data, mandating FIWARE Smart Data Models compliance."@en ;
+    rdfs:subClassOf simpl:DataOffering .

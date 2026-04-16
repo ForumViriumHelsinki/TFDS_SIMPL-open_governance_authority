@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-init-script
+  namespace: {{ .Values.cluster.namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+data:
+  init.sh: |
+    #!/bin/sh
+    set -e
+
+    # ==============================================================================
+    # INJECTED CONFIGURATION VARIABLES
+    # ==============================================================================
+    NAMESPACE="{{ .Values.cluster.namespace }}"
+    TIER2_HOSTNAME="tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+    ORG_NAME="{{ .Values.organization.name }}"
+    ORG_UNIT="{{ .Values.organization.unit }}"
+    COUNTRY="{{ .Values.organization.country }}"
+    PARTICIPANT_TYPE="GOVERNANCE_AUTHORITY"
+
+    AUTHORITY_AUTH_PROVIDER="http://authentication-provider:8080"
+    AUTHORITY_IDENTITY_PROVIDER="http://identity-provider:8080"
+    CSR_FILE="/tmp/csr.pem"
+    CERT_FILE="/tmp/cert.pem"
+
+    echo "========================================================"
+    echo " Starting Simpl Identity Initialization"
+    echo " Target Namespace:  $NAMESPACE"
+    echo " Hostname (CN):     $TIER2_HOSTNAME"
+    echo " Organization:      $ORG_NAME ($COUNTRY) - Unit: $ORG_UNIT"
+    echo " Participant Type:  $PARTICIPANT_TYPE"
+    echo "========================================================"
+
+    # Wait for the backend Spring Boot APIs to come online
+    echo "-> Waiting for Authentication and Identity APIs to become available..."
+    MAX_RETRIES=30
+    RETRY_COUNT=0
+    until curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/keypairs" | grep -q "405\|401\|403\|200\|404" && \
+          curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" | grep -q "405\|401\|403\|200\|404"; do
+      if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+        echo "❌ Timeout waiting for backend APIs."
+        exit 1
+      fi
+      echo "   Waiting 10s... ($RETRY_COUNT/$MAX_RETRIES)"
+      sleep 10
+      RETRY_COUNT=$((RETRY_COUNT+1))
+    done
+    echo "✅ APIs are reachable!"
+
+    # Execute Workflow
+    echo "-> Generating Keypair..."
+    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null || echo "   (Keypair may already exist)"
+
+    echo "-> Generating CSR..."
+    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
+    --header 'Content-Type: application/json' \
+    --data-raw "{
+      \"commonName\": \"$TIER2_HOSTNAME\",
+      \"country\": \"$COUNTRY\",
+      \"organization\": \"$ORG_NAME\",
+      \"organizationalUnit\": \"$ORG_UNIT\"
+    }" > "$CSR_FILE"
+
+    echo "-> Creating Participant in Identity Provider..."
+    PARTICIPANT_ID=$(curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
+    --header 'Content-Type: application/json' \
+    --data-raw "{
+      \"organization\": \"$ORG_NAME\",
+      \"participantType\": \"$PARTICIPANT_TYPE\"
+    }" | sed -E 's/^"(.*)"$/\1/') || {
+      echo ""
+      echo "   ⚠️ WARNING: Participant creation failed (Likely already exists)."
+      echo "   Retrieving existing Participant ID instead..."
+      # Fallback to get existing if recreation failed (Assuming first participant is the authority)
+      PARTICIPANT_ID=$(curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p' | head -n 1)
+      echo "   Found existing Participant ID: $PARTICIPANT_ID"
+      echo ""
+    }
+    
+    if [ -n "$PARTICIPANT_ID" ]; then
+      echo "   Active Participant ID: $PARTICIPANT_ID"
+    fi
+
+    echo "-> Uploading CSR to Identity Provider..."
+    curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
+    -F "csr=@$CSR_FILE" > /dev/null || echo "   (CSR may already be uploaded)"
+
+    echo "-> Downloading Signed Credential..."
+    curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
+    -o "$CERT_FILE" || {
+      echo "   ⚠️ WARNING: Failed to download signed credential."
+    }
+
+    echo "-> Uploading Signed Credential to Authentication Provider..."
+    CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
+    -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/') || echo "   (Credential may already be uploaded)"
+    
+    if [ -n "$CREDENTIAL_ID" ]; then
+      echo "   Stored Credential ID: $CREDENTIAL_ID"
+      echo ""
+      echo "========================================================"
+      echo " 🎉 FRESH INITIALIZATION COMPLETE!"
+      echo " The Governance Authority identity has been generated."
+      echo "========================================================"
+    else
+      echo ""
+      echo "========================================================"
+      echo " ℹ️  INITIALIZATION SKIPPED (NO ACTION REQUIRED)"
+      echo " The Governance Authority is already fully initialized."
+      echo " Existing keys and certificates are safely preserved."
+      echo "========================================================"
+    fi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: agent-init-job
+  namespace: {{ .Values.cluster.namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: agent-init-job
+    spec:
+      containers:
+      - name: init-runner
+        image: curlimages/curl:8.7.1
+        command: ["/bin/sh", "/scripts/init.sh"]
+        volumeMounts:
+        - name: script-volume
+          mountPath: "/scripts"
+          readOnly: true
+      restartPolicy: Never
+      volumes:
+      - name: script-volume
+        configMap:
+          name: agent-init-script
+          defaultMode: 0555

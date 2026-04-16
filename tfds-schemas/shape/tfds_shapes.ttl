@@ -1,0 +1,30 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix tfds: <http://trafficflowdataspace.eu/ontology#> .
+@prefix simpl: <http://w3id.org/gaia-x/simpl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ----------------------------------------------------------------------
+# TFDS SHACL Validation Shapes
+# ----------------------------------------------------------------------
+
+tfds:TrafficFlowDataOfferingShape a sh:NodeShape ;
+    sh:targetClass tfds:TrafficFlowDataOffering ;
+    sh:property [ sh:path dcterms:conformsTo ; sh:hasValue <https://datex2.eu/> ; sh:message "TFDS Violation: Traffic Flow Data Offerings MUST conform to the DATEX II standard (https://datex2.eu/)." ; ] ;
+    sh:property [ sh:path odrl:hasPolicy ; sh:minCount 1 ; sh:message "TFDS Violation: All Data Offerings MUST include a machine-readable ODRL usage policy." ; ] .
+
+tfds:TrafficDisturbanceDataOfferingShape a sh:NodeShape ;
+    sh:targetClass tfds:TrafficDisturbanceDataOffering ;
+    sh:property [ sh:path dcterms:conformsTo ; sh:hasValue <https://datex2.eu/> ; sh:message "TFDS Violation: Traffic Disturbance Data Offerings MUST conform to the DATEX II standard (https://datex2.eu/)." ; ] ;
+    sh:property [ sh:path odrl:hasPolicy ; sh:minCount 1 ; sh:message "TFDS Violation: All Data Offerings MUST include a machine-readable ODRL usage policy." ; ] .
+
+tfds:IdeaValidationDataOfferingShape a sh:NodeShape ;
+    sh:targetClass tfds:IdeaValidationDataOffering ;
+    sh:property [ sh:path dcterms:conformsTo ; sh:hasValue <https://datex2.eu/> ; sh:message "TFDS Violation: IDEA Validation Data Offerings MUST conform to the DATEX II standard (https://datex2.eu/)." ; ] ;
+    sh:property [ sh:path odrl:hasPolicy ; sh:minCount 1 ; sh:message "TFDS Violation: All Data Offerings MUST include a machine-readable ODRL usage policy." ; ] .
+
+tfds:AirQualityDataOfferingShape a sh:NodeShape ;
+    sh:targetClass tfds:AirQualityDataOffering ;
+    sh:property [ sh:path dcterms:conformsTo ; sh:hasValue <https://smartdatamodels.org/> ; sh:message "TFDS Violation: Air Quality Data Offerings MUST conform to the FIWARE Smart Data Models (https://smartdatamodels.org/)." ; ] ;
+    sh:property [ sh:path odrl:hasPolicy ; sh:minCount 1 ; sh:message "TFDS Violation: All Data Offerings MUST include a machine-readable ODRL usage policy." ; ] .

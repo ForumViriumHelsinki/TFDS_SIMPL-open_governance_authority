@@ -2,13 +2,18 @@ singleNode: ${SINGLENODE}
 
 values:
   repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
-  branch: main
+  branch: ${BRANCH}
 
 project: ${PROJECT}
 domainSuffix: ${DOMAINSUFFIX}
 namespaceTag:
   authority: ${AUTHNAMESPACETAG}
   common: ${COMMONSPACETAG}
+
+organization:
+  name: ${ORG_NAME}
+  unit: ${ORG_UNIT}
+  country: ${ORG_COUNTRY}
 
 resourcePreset: default
 # resourcePreset: low

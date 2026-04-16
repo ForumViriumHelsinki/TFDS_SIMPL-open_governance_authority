@@ -5,50 +5,91 @@ metadata:
   namespace: {{ .Values.cluster.namespace }}
 data:
   import-ttl.sh: |
-    #!/bin/bash
-
-    # Exit on error
+    #!/bin/sh
     set -e
 
-    # Usage check
+    # ======================================================================================
+    # TFDS SCHEMA SEEDER (POST-Only)
+    #
+    # Architecture Decision: 
+    # Ontologies are foundational. Dynamically updating schemas (via PUT) risks breaking
+    # existing data offerings across the federation. 
+    # Therefore, this script acts purely as an idempotent database seeder. 
+    # It attempts to CREATE (POST) the schemas. If the Federated Catalogue returns a 
+    # "conflict_error" (meaning the schema already exists), it assumes success and safely 
+    # skips to the next file without overwriting.
+    # ======================================================================================
+
     if [ -z "$1" ]; then
       echo "Usage: $0 <ENDPOINT_URL>"
       exit 1
     fi
 
-    # Get the endpoint from the first argument
     ENDPOINT_URL="$1"
     SCHEMA_PATH="/schemas"
+    ERRORS_OCCURRED=0
 
     # Healthcheck
-    until curl -s --head --fail "$1/schemas" >/dev/null; do echo "Waiting for endpoint to become available..."; sleep 5; done
+    until curl -s --head --fail "${ENDPOINT_URL}/schemas" >/dev/null; do 
+      echo "Waiting for endpoint to become available..."; sleep 5; 
+    done
 
-    # Raw file URLs
-    FILE1_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/feature/pre-release-S23/yaml2ontology/simpl_ontology_generated.ttl"
-    FILE2_URL="https://code.europa.eu/simpl/simpl-open/development/data1/sdtooling-sd-schemas/-/raw/feature/pre-release-S23/yaml2shape/merged-shapes.ttl"
+    # Safe seeder function
+    seed_schema() {
+      local FILE_URL=$1
+      local FILE_NAME=$(basename "$FILE_URL")
+      local TMP_FILE=$(mktemp)
 
-    # Temporary files
-    TMP1=$(mktemp)
-    TMP2=$(mktemp)
+      echo "--------------------------------------------------------"
+      echo "Downloading $FILE_NAME..."
+      curl -sSL "$FILE_URL" -o "$TMP_FILE"
 
-    # Download the files
-    curl -sSL "$FILE1_URL" -o "$TMP1"
-    curl -sSL "$FILE2_URL" -o "$TMP2"
+      echo "Attempting to create (POST) $FILE_NAME..."
+      RESPONSE=$(curl -s -w "\n%{http_code}" --location "${ENDPOINT_URL}${SCHEMA_PATH}" \
+        --header "Content-Type: text/turtle" \
+        --header "Accept: application/json" \
+        --data-binary @"$TMP_FILE")
+      
+      HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+      BODY=$(echo "$RESPONSE" | sed '$d')
 
-    # POST the first file
-    curl --location "${ENDPOINT_URL}${SCHEMA_PATH}" \
-      --header "Content-Type: text/turtle" \
-      --header "Accept: application/json" \
-      --data-binary @"$TMP1"
+      if echo "$BODY" | grep -q "conflict_error" || echo "$BODY" | grep -q "Schema redefines existing terms"; then
+        echo " Success: Schema already exists in catalogue. Skipping creation."
+      elif [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+        echo " Success: Creation complete for $FILE_NAME (HTTP $HTTP_CODE)."
+      else
+        echo " ❌ FAILED to create $FILE_NAME (HTTP $HTTP_CODE)."
+        echo " Error: $BODY"
+        ERRORS_OCCURRED=1
+      fi
+      
+      rm "$TMP_FILE"
+    }
 
-    # POST the second file
-    curl --location "${ENDPOINT_URL}${SCHEMA_PATH}" \
-      --header "Content-Type: text/turtle" \
-      --header "Accept: application/json" \
-      --data-binary @"$TMP2"
+    BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/main/tfds-schemas"
+    
+    # NOTE: The order is critical! Base SIMPL schemas must be loaded BEFORE TFDS extensions.
+    
+    # 1. Base SIMPL Ontology
+    seed_schema "${BASE_RAW_URL}/ontology/simpl_ontology.ttl"
+    
+    # 2. Base SIMPL Shapes
+    seed_schema "${BASE_RAW_URL}/shape/simpl_shapes.ttl"
+    
+    # 3. TFDS Extended Ontology
+    seed_schema "${BASE_RAW_URL}/ontology/tfds_ontology.ttl"
+    
+    # 4. TFDS Extended Shapes
+    seed_schema "${BASE_RAW_URL}/shape/tfds_shapes.ttl"
 
-    # Clean up
-    rm "$TMP1" "$TMP2"
+    echo "--------------------------------------------------------"
+    if [ "$ERRORS_OCCURRED" -eq 1 ]; then
+      echo "❌ ERROR: One or more schemas failed to import."
+      exit 1
+    else
+      echo "✅ All schemas processed successfully."
+      exit 0
+    fi
 
 ---
 apiVersion: batch/v1
@@ -58,9 +99,9 @@ metadata:
   name: import-ttl-job
   annotations:
     "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   backoffLimit: 12
-  ttlSecondsAfterFinished: 300
   template:
     metadata:
       annotations:

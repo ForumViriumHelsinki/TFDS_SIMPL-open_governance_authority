@@ -19,6 +19,10 @@ spec:
           authority: authority            # identifier of deployment and part of fqdn for this agent
           common: common                  # identifier of deployment and part of fqdn for common components
         domainSuffix: ds.helsinki.tfds.io           # last part of fqdn
+        organization:
+          name: "FVH"
+          unit: "Data"
+          country: "FI"
         resourcePreset: low             # set to "low" to disable requests of resources
         argocd:
           appname: authority              # name of generated argocd app 
