@@ -23,7 +23,7 @@ simpl:
 a		voaf:Vocabulary, owl:Ontology ;
 rdfs:label		"Gaia-X trusted-cloud Ontology"@en ;
 dct:title		"Gaia-X trusted-cloud Ontology"@en ;
-dct:abstract		"todo" ;
+dct:abstract            "Core SIMPL-Open operational ontology defining the foundational vocabulary, participant identity, and service offering characteristics required for European Data Space federation." ;
 cc:license		<http://www.apache.org/licenses/LICENSE-2.0> ;
 dct:creator		"Working Group Service Characteristics" ;
 dct:contributor		"Akyürek, Haydar", "Bader, Sebastian", "Baum, Hannes", "Blanch, Josep", "Frömberg, Jan", "Gronlier, Pierre", "Hermsen, Felix", "Lange, Christoph", "Langkau, Jörg", "Leberecht, Markus", "Meinke, Kai", "Moosmann, Paul", "Niessen, Thomas", "Ogel, Frederic", "Ottradovetz, Klaus", "Qin, Chang", "Rubina, Alina", "Staginus, Judith", "Strunk, Anja", "Theissen-Lipp, Johannes" ;

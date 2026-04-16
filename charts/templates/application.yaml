@@ -809,7 +809,7 @@ spec:
         {{- end }}
   - repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authentication_provider.git"
     path: 'charts'
-    targetRevision: HEAD
+    targetRevision: main
     helm:
       valueFiles:
         {{- range .Values.auth_provider.valueFiles }}

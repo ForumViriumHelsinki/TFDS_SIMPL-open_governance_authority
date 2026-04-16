@@ -131,7 +131,7 @@ spec:
     spec:
       containers:
       - name: init-runner
-        image: curlimages/curl:latest
+        image: curlimages/curl:8.7.1
         command: ["/bin/sh", "/scripts/init.sh"]
         volumeMounts:
         - name: script-volume
@@ -142,4 +142,4 @@ spec:
       - name: script-volume
         configMap:
           name: agent-init-script
-          defaultMode: 0777
+          defaultMode: 0555
