@@ -101,11 +101,19 @@ data:
     
     if [ -n "$CREDENTIAL_ID" ]; then
       echo "   Stored Credential ID: $CREDENTIAL_ID"
+      echo ""
+      echo "========================================================"
+      echo " 🎉 FRESH INITIALIZATION COMPLETE!"
+      echo " The Governance Authority identity has been generated."
+      echo "========================================================"
+    else
+      echo ""
+      echo "========================================================"
+      echo " ℹ️  INITIALIZATION SKIPPED (NO ACTION REQUIRED)"
+      echo " The Governance Authority is already fully initialized."
+      echo " Existing keys and certificates are safely preserved."
+      echo "========================================================"
     fi
-
-    echo "========================================================"
-    echo " Initialization Complete!"
-    echo "========================================================"
 ---
 apiVersion: batch/v1
 kind: Job
