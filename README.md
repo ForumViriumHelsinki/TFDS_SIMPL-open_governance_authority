@@ -66,3 +66,34 @@ ArgoCD will automatically read the configuration and begin spinning up the Gover
 The Governance Authority serves as the primary trust anchor for your data space. After deployment, other agents (like the Data Provider and Data Consumer) will interact with this Authority to receive their business-level certificates and become onboarded participants.
 
 For the full participant onboarding flow, reference the official [SIMPL Open Onboarding Manual (v2.8.x)](https://code.europa.eu/simpl/simpl-open/development/iaa/documentation/-/tree/main/versioned_docs/2.8.x/user-manual/ONBOARD.md?ref_type=heads).
+
+### Step 4: Post-Install Configuration (Schema & Vocabulary Loading)
+
+After the Governance Authority is successfully deployed and initialized, the **data space schema shapes** and **vocabularies (ontology)** must be loaded into the internal Federated Catalogue (`xsfc-service`). Without these definitions, participants in the data space will not be able to generate or validate Self-Descriptions (SDs) properly via the SD-Tooling UI.
+
+#### Automated Seeding via Helm Hooks
+In this repository, this process has been fully automated. The modified `charts/templates/import-ttl.yaml` file contains a Kubernetes Job (`import-ttl-job`) attached to the `post-install` and `post-upgrade` Helm hooks. 
+
+Once the catalogue is online, this job automatically downloads the required `.ttl` files (Turtle format) and seeds them into the internal API.
+
+#### Architectural Design: Separation of Core and TFDS Customisations
+In order to maintain strict interoperability while allowing domain-specific flexibility,
+this repository separates the schemas into two distinct layers.
+
+The seeding job loads the schemas in a strict, specific order:
+
+1. **`simpl_ontology.ttl` & `simpl_shapes.ttl`**: 
+    * These are the *Core SIMPL-Open schemas*. They define the foundational, domain-agnostic concepts (e.g., standard `Participant`, `DataOffering`). 
+2. **`tfds_ontology.ttl` & `tfds_shapes.ttl`**: 
+    * These are the *Custom TFDS extensions*. They build upon the core concepts to add Smart City/Helsinki-specific properties and validation rules.
+
+**Why this approach?**
+* **Interoperability (Federation):** By preserving the unmodified core SIMPL schemas, the TFDS data space ensures it remains fully compatible with other European Gaia-X / SIMPL data spaces. Other ecosystems will still be able to read and understand the base properties of TFDS offerings.
+* **Maintainability:** When the central SIMPL-Open project releases an update to their core ontology, we can seamlessly upgrade the base `.ttl` files without accidentally overwriting or losing the custom TFDS business logic.
+* **Idempotency:** The seeding script is designed to safely `POST` the schemas. If the catalogue returns a conflict (meaning the schema already exists), it safely skips it rather than forcing an overwrite (`PUT`). This protects existing, live Self-Descriptions from being invalidated by accidental schema mutations during routine deployments.
+
+#### Customizing Data Space Schemas
+This repository is designed to act as a template. If your data space requires further custom schemas:
+
+1. **Update the Download URLs:** Edit `charts/templates/import-ttl.yaml` to point the `BASE_RAW_URL` to your own Git repository containing your custom compiled `.ttl` extension files.
+2. **Air-gapped Environments:** If your cluster does not have outbound internet access, you must modify `import-ttl.yaml` to mount the `.ttl` files directly into the Job via a Kubernetes `ConfigMap` rather than downloading them live over the internet.
