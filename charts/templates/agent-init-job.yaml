@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: agent-init-script
-  namespace: {{ .Values.cluster.namespace }}
+  namespace: { { .Values.cluster.namespace } }
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "-5"
@@ -35,25 +35,52 @@ data:
     echo " Participant Type:  $PARTICIPANT_TYPE"
     echo "========================================================"
 
+    # ==============================================================================
+    # VALIDATION CHECK: ENSURE REQUIRED HELM VALUES ARE PROVIDED
+    # ==============================================================================
+    if [ -z "$ORG_NAME" ] || [ -z "$ORG_UNIT" ] || [ -z "$COUNTRY" ]; then
+      echo "❌ ERROR: Missing required Organization configuration in Helm values!"
+      echo "   Please ensure 'organization.name', 'organization.unit', and 'organization.country'"
+      echo "   are properly defined in your values.yaml or ArgoCD manifest."
+      echo "   Initialization aborted."
+      exit 1
+    fi
+
     # Wait for the backend Spring Boot APIs to come online
     echo "-> Waiting for Authentication and Identity APIs to become available..."
     MAX_RETRIES=30
     RETRY_COUNT=0
-    until curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/keypairs" | grep -q "405\|401\|403\|200\|404" && \
-          curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" | grep -q "405\|401\|403\|200\|404"; do
+
+    # Query the Spring Boot /actuator/health endpoints to ensure the apps are fully booted and connected to the DB.
+    until curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/actuator/health" | grep -q "200" && \
+          curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_IDENTITY_PROVIDER/actuator/health" | grep -q "200"; do
       if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
-        echo "❌ Timeout waiting for backend APIs."
+        echo "❌ Timeout waiting for backend APIs to become healthy."
         exit 1
       fi
       echo "   Waiting 10s... ($RETRY_COUNT/$MAX_RETRIES)"
       sleep 10
       RETRY_COUNT=$((RETRY_COUNT+1))
     done
-    echo "✅ APIs are reachable!"
+    echo "✅ APIs are healthy and reachable!"
+
+    # ==============================================================================
+    # IDEMPOTENCY CHECK: PREVENT OVERWRITING EXISTING IDENTITIES ON REBOOT/RESYNC
+    # ==============================================================================
+    echo "-> Checking for existing credentials in Authentication Provider..."
+    # The API provides a HEAD endpoint specifically for checking if a keypair exists.
+    # It returns 200 if the keypair exists, and 404 if it does not.
+    KEYPAIR_STATUS=$(curl -s -I -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/keypairs")
+
+    if [ "$KEYPAIR_STATUS" = "200" ] || [ "$KEYPAIR_STATUS" = "401" ] || [ "$KEYPAIR_STATUS" = "403" ]; then
+      echo "   ✅ Found existing keypair state (HTTP $KEYPAIR_STATUS). The Governance Authority is already fully initialized."
+      echo "   Skipping initialization to preserve the existing identity and certificates."
+      exit 0
+    fi
 
     # Execute Workflow
     echo "-> Generating Keypair..."
-    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null || echo "   (Keypair may already exist)"
+    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate"
 
     echo "-> Generating CSR..."
     curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
@@ -80,14 +107,14 @@ data:
       echo "   Found existing Participant ID: $PARTICIPANT_ID"
       echo ""
     }
-    
+
     if [ -n "$PARTICIPANT_ID" ]; then
       echo "   Active Participant ID: $PARTICIPANT_ID"
     fi
 
     echo "-> Uploading CSR to Identity Provider..."
     curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
-    -F "csr=@$CSR_FILE" > /dev/null || echo "   (CSR may already be uploaded)"
+    -F "csr=@$CSR_FILE"
 
     echo "-> Downloading Signed Credential..."
     curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
@@ -97,8 +124,8 @@ data:
 
     echo "-> Uploading Signed Credential to Authentication Provider..."
     CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
-    -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/') || echo "   (Credential may already be uploaded)"
-    
+    -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/')
+
     if [ -n "$CREDENTIAL_ID" ]; then
       echo "   Stored Credential ID: $CREDENTIAL_ID"
       echo ""
@@ -109,17 +136,20 @@ data:
     else
       echo ""
       echo "========================================================"
-      echo " ℹ️  INITIALIZATION SKIPPED (NO ACTION REQUIRED)"
-      echo " The Governance Authority is already fully initialized."
-      echo " Existing keys and certificates are safely preserved."
+      echo " ❌ CRITICAL ERROR: INITIALIZATION FAILED!"
+      echo " The script reached the end of the workflow but failed to"
+      echo " receive a valid Credential ID from the Authentication Provider."
+      echo " This indicates the Governance Authority's identity is incomplete."
+      echo " Check the Identity Provider and EJBCA logs for signing errors."
       echo "========================================================"
+      exit 1
     fi
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: agent-init-job
-  namespace: {{ .Values.cluster.namespace }}
+  namespace: { { .Values.cluster.namespace } }
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "0"
@@ -130,16 +160,16 @@ spec:
       name: agent-init-job
     spec:
       containers:
-      - name: init-runner
-        image: curlimages/curl:8.7.1
-        command: ["/bin/sh", "/scripts/init.sh"]
-        volumeMounts:
-        - name: script-volume
-          mountPath: "/scripts"
-          readOnly: true
+        - name: init-runner
+          image: curlimages/curl:8.7.1
+          command: ["/bin/sh", "/scripts/init.sh"]
+          volumeMounts:
+            - name: script-volume
+              mountPath: "/scripts"
+              readOnly: true
       restartPolicy: Never
       volumes:
-      - name: script-volume
-        configMap:
-          name: agent-init-script
-          defaultMode: 0555
+        - name: script-volume
+          configMap:
+            name: agent-init-script
+            defaultMode: 0555

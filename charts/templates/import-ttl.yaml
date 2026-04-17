@@ -66,7 +66,7 @@ data:
       rm "$TMP_FILE"
     }
 
-    BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/main/tfds-schemas"
+    BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/{{ .Values.values.branch }}/tfds-schemas"
     
     # NOTE: The order is critical! Base SIMPL schemas must be loaded BEFORE TFDS extensions.
     
