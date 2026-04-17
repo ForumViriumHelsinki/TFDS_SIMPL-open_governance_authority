@@ -43,7 +43,7 @@ kubectl rollout restart deployment pg-operator-common -n common
 
 Wait a few moments for the operator to synchronize and create the databases.
 
-### Step 1.3: Restart the Authority Pods
+### Step 1.4: Restart the Authority Pods
 Now that the empty databases exist again, you must restart the affected applications. Upon restarting, the applications will automatically connect to PostgreSQL and execute their internal database migrations (e.g., Flyway/Liquibase) to rebuild their table structures from scratch.
 
 ```bash
