@@ -66,13 +66,12 @@ data:
     # IDEMPOTENCY CHECK: PREVENT OVERWRITING EXISTING IDENTITIES ON REBOOT/RESYNC
     # ==============================================================================
     echo "-> Checking for existing credentials in Authentication Provider..."
-    # Since we are calling the API without an OAuth2 Bearer token:
-    # - If the credential exists, the API will return 401 (Unauthorized) or 403 (Forbidden).
-    # - If the credential does NOT exist, the API will return 404 (Not Found).
-    CRED_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/credentials")
+    # The API provides a HEAD endpoint specifically for checking if a keypair exists.
+    # It returns 200 if the keypair exists, and 404 if it does not.
+    KEYPAIR_STATUS=$(curl -s -I -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/keypairs")
     
-    if [ "$CRED_STATUS" != "404" ]; then
-      echo "   ✅ Found existing credential state (HTTP $CRED_STATUS). The Governance Authority is already fully initialized."
+    if [ "$KEYPAIR_STATUS" = "200" ] || [ "$KEYPAIR_STATUS" = "401" ] || [ "$KEYPAIR_STATUS" = "403" ]; then
+      echo "   ✅ Found existing keypair state (HTTP $KEYPAIR_STATUS). The Governance Authority is already fully initialized."
       echo "   Skipping initialization to preserve the existing identity and certificates."
       exit 0
     fi
