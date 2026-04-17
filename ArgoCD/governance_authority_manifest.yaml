@@ -12,6 +12,7 @@ spec:
     helm:
       values: |
         singleNode: true
+        authInitAutomation: true       # Toggle automated Governance Authority initialization job
         values:
           branch: main                 # branch of repo with values - for released version it should be the release branch
         project: default                    # Project to which the namespace is attached

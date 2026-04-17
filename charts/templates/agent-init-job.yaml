@@ -1,3 +1,4 @@
+{{- if .Values.authInitAutomation }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -67,18 +68,31 @@ data:
     # ==============================================================================
     # IDEMPOTENCY CHECK: PREVENT OVERWRITING EXISTING IDENTITIES ON REBOOT/RESYNC
     # ==============================================================================
-    echo "-> Checking for existing credentials in Authentication Provider..."
-    # The API provides a HEAD endpoint specifically for checking if a keypair exists.
-    # It returns 200 if the keypair exists, and 404 if it does not.
-    KEYPAIR_STATUS=$(curl -s -I -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/keypairs")
+    echo "-> Checking if Governance Authority identity is already initialized..."
+    # The safest way to check idempotency without OAuth2 tokens is to attempt 
+    # to create the GOVERNANCE_AUTHORITY participant.
+    # The Identity Provider returns HTTP 409 Conflict ("Authority already initialized") 
+    # if the system was already fully bootstrapped.
 
-    if [ "$KEYPAIR_STATUS" = "200" ] || [ "$KEYPAIR_STATUS" = "401" ] || [ "$KEYPAIR_STATUS" = "403" ]; then
-      echo "   ✅ Found existing keypair state (HTTP $KEYPAIR_STATUS). The Governance Authority is already fully initialized."
+    HTTP_STATUS=$(curl -s -o /tmp/id_response.txt -w "%{http_code}" -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
+    --header 'Content-Type: application/json' \
+    --data-raw "{
+      \"organization\": \"$ORG_NAME\",
+      \"participantType\": \"$PARTICIPANT_TYPE\"
+    }")
+
+    if grep -q "Authority already initialized" /tmp/id_response.txt || [ "$HTTP_STATUS" = "409" ]; then
+      echo "   ✅ Found existing Governance Authority identity (HTTP 409). The data space is already initialized."
       echo "   Skipping initialization to preserve the existing identity and certificates."
       exit 0
     fi
 
-    # Execute Workflow
+    echo "   No existing Authority found. Proceeding with full PKI initialization..."
+
+    # Extract participant ID from successful creation (HTTP 200/201)
+    PARTICIPANT_ID=$(cat /tmp/id_response.txt | sed -E 's/^"(.*)"$/\1/')
+
+    # Execute PKI Workflow
     echo "-> Generating Keypair..."
     curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate"
 
@@ -92,26 +106,7 @@ data:
       \"organizationalUnit\": \"$ORG_UNIT\"
     }" > "$CSR_FILE"
 
-    echo "-> Creating Participant in Identity Provider..."
-    PARTICIPANT_ID=$(curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
-    --header 'Content-Type: application/json' \
-    --data-raw "{
-      \"organization\": \"$ORG_NAME\",
-      \"participantType\": \"$PARTICIPANT_TYPE\"
-    }" | sed -E 's/^"(.*)"$/\1/') || {
-      echo ""
-      echo "   ⚠️ WARNING: Participant creation failed (Likely already exists)."
-      echo "   Retrieving existing Participant ID instead..."
-      # Fallback to get existing if recreation failed (Assuming first participant is the authority)
-      PARTICIPANT_ID=$(curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p' | head -n 1)
-      echo "   Found existing Participant ID: $PARTICIPANT_ID"
-      echo ""
-    }
-
-    if [ -n "$PARTICIPANT_ID" ]; then
-      echo "   Active Participant ID: $PARTICIPANT_ID"
-    fi
-
+    echo "   Active Participant ID: $PARTICIPANT_ID"
     echo "-> Uploading CSR to Identity Provider..."
     curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
     -F "csr=@$CSR_FILE"
@@ -173,3 +168,4 @@ spec:
           configMap:
             name: agent-init-script
             defaultMode: 0555
+{{- end }}
