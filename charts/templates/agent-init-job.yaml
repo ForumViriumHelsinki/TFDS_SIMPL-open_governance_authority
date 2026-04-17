@@ -149,7 +149,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: agent-init-job
-  namespace: { { .Values.cluster.namespace } }
+  namespace: {{ .Values.cluster.namespace }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "0"
