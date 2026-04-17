@@ -35,6 +35,17 @@ data:
     echo " Participant Type:  $PARTICIPANT_TYPE"
     echo "========================================================"
 
+    # ==============================================================================
+    # VALIDATION CHECK: ENSURE REQUIRED HELM VALUES ARE PROVIDED
+    # ==============================================================================
+    if [ -z "$ORG_NAME" ] || [ -z "$ORG_UNIT" ] || [ -z "$COUNTRY" ]; then
+      echo "❌ ERROR: Missing required Organization configuration in Helm values!"
+      echo "   Please ensure 'organization.name', 'organization.unit', and 'organization.country'"
+      echo "   are properly defined in your values.yaml or ArgoCD manifest."
+      echo "   Initialization aborted."
+      exit 0
+    fi
+
     # Wait for the backend Spring Boot APIs to come online
     echo "-> Waiting for Authentication and Identity APIs to become available..."
     MAX_RETRIES=30
@@ -50,6 +61,19 @@ data:
       RETRY_COUNT=$((RETRY_COUNT+1))
     done
     echo "✅ APIs are reachable!"
+
+    # ==============================================================================
+    # IDEMPOTENCY CHECK: PREVENT OVERWRITING EXISTING IDENTITIES ON REBOOT/RESYNC
+    # ==============================================================================
+    echo "-> Checking for existing credentials in Authentication Provider..."
+    # The API returns 200 if a credential exists, or 404 if it does not.
+    CRED_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/credentials")
+    
+    if [ "$CRED_STATUS" = "200" ]; then
+      echo "   ✅ Found existing valid credential. The Governance Authority is already fully initialized."
+      echo "   Skipping initialization to preserve the existing identity and certificates."
+      exit 0
+    fi
 
     # Execute Workflow
     echo "-> Generating Keypair..."
