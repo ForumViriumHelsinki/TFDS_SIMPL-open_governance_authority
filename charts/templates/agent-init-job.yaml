@@ -50,17 +50,19 @@ data:
     echo "-> Waiting for Authentication and Identity APIs to become available..."
     MAX_RETRIES=30
     RETRY_COUNT=0
-    until curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/v1/keypairs" | grep -q "405\|401\|403\|200\|404" && \
-          curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" | grep -q "405\|401\|403\|200\|404"; do
+    
+    # Query the Spring Boot /actuator/health endpoints to ensure the apps are fully booted and connected to the DB.
+    until curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/actuator/health" | grep -q "200" && \
+          curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_IDENTITY_PROVIDER/actuator/health" | grep -q "200"; do
       if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
-        echo "❌ Timeout waiting for backend APIs."
+        echo "❌ Timeout waiting for backend APIs to become healthy."
         exit 1
       fi
       echo "   Waiting 10s... ($RETRY_COUNT/$MAX_RETRIES)"
       sleep 10
       RETRY_COUNT=$((RETRY_COUNT+1))
     done
-    echo "✅ APIs are reachable!"
+    echo "✅ APIs are healthy and reachable!"
 
     # ==============================================================================
     # IDEMPOTENCY CHECK: PREVENT OVERWRITING EXISTING IDENTITIES ON REBOOT/RESYNC
@@ -78,7 +80,7 @@ data:
 
     # Execute Workflow
     echo "-> Generating Keypair..."
-    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null || echo "   (Keypair may already exist)"
+    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate"
 
     echo "-> Generating CSR..."
     curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
@@ -112,7 +114,7 @@ data:
 
     echo "-> Uploading CSR to Identity Provider..."
     curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
-    -F "csr=@$CSR_FILE" > /dev/null || echo "   (CSR may already be uploaded)"
+    -F "csr=@$CSR_FILE"
 
     echo "-> Downloading Signed Credential..."
     curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
@@ -122,7 +124,7 @@ data:
 
     echo "-> Uploading Signed Credential to Authentication Provider..."
     CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
-    -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/') || echo "   (Credential may already be uploaded)"
+    -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/')
     
     if [ -n "$CREDENTIAL_ID" ]; then
       echo "   Stored Credential ID: $CREDENTIAL_ID"
@@ -134,10 +136,13 @@ data:
     else
       echo ""
       echo "========================================================"
-      echo " ℹ️  INITIALIZATION SKIPPED (NO ACTION REQUIRED)"
-      echo " The Governance Authority is already fully initialized."
-      echo " Existing keys and certificates are safely preserved."
+      echo " ❌ CRITICAL ERROR: INITIALIZATION FAILED!"
+      echo " The script reached the end of the workflow but failed to"
+      echo " receive a valid Credential ID from the Authentication Provider."
+      echo " This indicates the Governance Authority's identity is incomplete."
+      echo " Check the Identity Provider and EJBCA logs for signing errors."
       echo "========================================================"
+      exit 1
     fi
 ---
 apiVersion: batch/v1
