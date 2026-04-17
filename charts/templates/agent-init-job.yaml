@@ -49,18 +49,19 @@ data:
 
     # Wait for the backend Spring Boot APIs to come online
     echo "-> Waiting for Authentication and Identity APIs to become available..."
-    MAX_RETRIES=30
+    MAX_RETRIES=60
     RETRY_COUNT=0
 
     # Query the Spring Boot /actuator/health endpoints to ensure the apps are fully booted and connected to the DB.
+    # Since this runs at initial deployment, the timer has been set to 60 minutes, so the services can become healthy.
     until curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_AUTH_PROVIDER/actuator/health" | grep -q "200" && \
           curl -s -o /dev/null -w "%{http_code}" "$AUTHORITY_IDENTITY_PROVIDER/actuator/health" | grep -q "200"; do
       if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
         echo "❌ Timeout waiting for backend APIs to become healthy."
         exit 1
       fi
-      echo "   Waiting 10s... ($RETRY_COUNT/$MAX_RETRIES)"
-      sleep 10
+      echo "   Waiting 60s... ($RETRY_COUNT/$MAX_RETRIES)"
+      sleep 60
       RETRY_COUNT=$((RETRY_COUNT+1))
     done
     echo "✅ APIs are healthy and reachable!"
@@ -69,9 +70,9 @@ data:
     # IDEMPOTENCY CHECK: PREVENT OVERWRITING EXISTING IDENTITIES ON REBOOT/RESYNC
     # ==============================================================================
     echo "-> Checking if Governance Authority identity is already initialized..."
-    # The safest way to check idempotency without OAuth2 tokens is to attempt 
+    # The safest way to check idempotency without OAuth2 tokens is to attempt
     # to create the GOVERNANCE_AUTHORITY participant.
-    # The Identity Provider returns HTTP 409 Conflict ("Authority already initialized") 
+    # The Identity Provider returns HTTP 409 Conflict ("Authority already initialized")
     # if the system was already fully bootstrapped.
 
     HTTP_STATUS=$(curl -s -o /tmp/id_response.txt -w "%{http_code}" -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
