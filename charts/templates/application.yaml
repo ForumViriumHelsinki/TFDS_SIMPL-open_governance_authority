@@ -486,9 +486,11 @@ spec:
           tracing:
             sampling:
               probability: 1.0
+          {{- if .Values.monitoring.enabled }}
           otlp:
             tracing:
               endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+          {{- end }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -797,9 +799,11 @@ spec:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_identityprovider"
               username: {{ .Values.namespaceTag.authority }}_identityprovider
           management:
+            {{- if .Values.monitoring.enabled }}
             otlp:
               tracing:
                 endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+            {{- end }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -826,9 +830,11 @@ spec:
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
         appConfig:
           management:
+            {{- if .Values.monitoring.enabled }}
             otlp:
               tracing:
                 endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+            {{- end }}
           spring:
             datasource:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
