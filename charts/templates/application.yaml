@@ -114,14 +114,14 @@ spec:
         - name: KEYCLOAK_BASE_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: AUTHENTICATION_PROVIDER_BASE_URL
-          value: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080" 
+          value: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080"
         - name: REALM
           value: "authority"
         - name: KEYCLOAK_EXTRA_ARGS
           value: --import-realm
         initContainers:
         - name: import-realm
-          image: nginx:latest 
+          image: nginx:latest
           command: ["/bin/sh", "-c"]
           env:
             - name: REDIRECT_URIS
@@ -132,10 +132,10 @@ spec:
               value: https://code.europa.eu/simpl/simpl-open/development/iaa/charts/-/raw/develop/samples/keycloak-realms/2.1.0/authority-realm-export.json?ref_type=heads
           args:
             - |
-              curl ${URL} | envsubst '$REDIRECT_URIS' > /config/${REALM_NAME}.json;   
+              curl ${URL} | envsubst '$REDIRECT_URIS' > /config/${REALM_NAME}.json;
           volumeMounts:
             - name: realm-volume
-              mountPath: /config 
+              mountPath: /config
         - name: init-spi
           image: curlimages/curl
           command: ["/bin/sh", "-c"]
@@ -149,7 +149,7 @@ spec:
               curl -o /custom-spi/${ARTIFACT}.jar ${URL};
           volumeMounts:
           - name: spi-volume
-            mountPath: /custom-spi        
+            mountPath: /custom-spi
         {{- if .Values.keycloak.resourcesPreset }}
         resourcesPreset: {{ .Values.keycloak.resourcesPreset }}
         {{- end }}
@@ -206,7 +206,7 @@ spec:
               - name: NAMESPACE
                 value: {{ .Values.cluster.namespace }}
             command:
-            - "./entrypoint.sh" 
+            - "./entrypoint.sh"
         nginx:
           host: *hostname
         {{- if eq .Values.resourcePreset "low" }}
@@ -292,7 +292,7 @@ spec:
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority" 
+          value: "authority"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
         {{- if eq .Values.resourcePreset "low" }}
@@ -326,7 +326,7 @@ spec:
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority" 
+          value: "authority"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
         {{- if eq .Values.resourcePreset "low" }}
@@ -360,7 +360,7 @@ spec:
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority" 
+          value: "authority"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
         {{- if eq .Values.resourcePreset "low" }}
@@ -394,7 +394,7 @@ spec:
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority" 
+          value: "authority"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
         {{- if eq .Values.resourcePreset "low" }}
@@ -421,14 +421,14 @@ spec:
         ingress:
           issuer: {{ .Values.cluster.issuer }}
         cors:
-          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000       
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
         env:
         - name: API_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority" 
+          value: "authority"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
         {{- if eq .Values.resourcePreset "low" }}
@@ -451,7 +451,7 @@ spec:
         - $values/app-values/SAP/{{ . }}
         {{- end }}
       values: |
-        env: 
+        env:
           - name: SPRING_DATASOURCE_PASSWORD
             value: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-securityattributesprovider
           - name: SPRING_DATA_REDIS_PASSWORD
@@ -466,13 +466,13 @@ spec:
           identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
           onboardingUrl: http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         appConfig:
-          spring: 
+          spring:
             data:
               redis:
                 host: redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local
             datasource:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_securityattributesprovider"
-              username: {{ .Values.namespaceTag.authority }}_securityattributesprovider 
+              username: {{ .Values.namespaceTag.authority }}_securityattributesprovider
         simpl:
           ephemeral-proof:
             issuer-url: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
@@ -567,7 +567,7 @@ spec:
         resources: {{- toYaml .Values.users_roles.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  {{- if .Values.xsfc_catalogue.enabled }}      
+  {{- if .Values.xsfc_catalogue.enabled }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.xsfc_catalogue.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.xsfc_catalogue.targetRevision }}
@@ -583,13 +583,13 @@ spec:
             - secretName: xsfc-server-tls
               hosts:
                 - xsfc-server-service.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
-          annotations: 
+          annotations:
             cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           role: {{ .Values.secrets.role }}
           secretEngine: {{ .Values.secrets.secretEngine }}
-        secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-xsfc-service"  
+        secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-xsfc-service"
         ingress:
           enabled: false
         {{- if eq .Values.resourcePreset "low" }}
@@ -612,7 +612,7 @@ spec:
         resources: {{- toYaml .Values.xsfc_catalogue.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  {{- end }}      
+  {{- end }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.onboarding.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.onboarding.targetRevision }}
@@ -747,8 +747,8 @@ spec:
           {{- if .Values.tier2_proxy.resources }}
         resources: {{- toYaml .Values.tier2_proxy.resources | nindent 10 }}
           {{- end }}
-        {{- end }}      
-  {{- if .Values.adapter.enabled }}                    
+        {{- end }}
+  {{- if .Values.adapter.enabled }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.adapter.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.adapter.targetRevision }}
@@ -766,8 +766,8 @@ spec:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           role: {{ .Values.secrets.role }}
           secretEngine: {{ .Values.secrets.secretEngine }}
-        secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-adapter-simpl-backend"  
-  {{- end }}        
+        secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-adapter-simpl-backend"
+  {{- end }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.identity_provider.projectID }}/packages/helm/stable"
     path: ''
     targetRevision: {{ .Values.identity_provider.targetRevision }}
@@ -778,7 +778,7 @@ spec:
         - $values/app-values/identity-provider/{{ . }}
         {{- end }}
       values: |
-        env: 
+        env:
           - name: SPRING_DATASOURCE_PASSWORD
             value: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-identityprovider
           - name: SPRING_SSL_BUNDLE_JKS_EJBCA_KEYSTORE_PASSWORD
@@ -814,27 +814,24 @@ spec:
         resources: {{- toYaml .Values.identity_provider.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  - repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authentication_provider.git"
-    path: 'charts'
-    targetRevision: main
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.auth_provider.projectID }}/packages/helm/stable"
+    path: ''
+    targetRevision: {{ .Values.auth_provider.targetRevision }}
+    chart: {{ .Values.auth_provider.chart_name }}
     helm:
       valueFiles:
         {{- range .Values.auth_provider.valueFiles }}
         - $values/app-values/auth-provider/{{ . }}
         {{- end }}
       values: |
-        image:
-          tag: "{{ .Values.auth_provider.targetRevision }}"
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
         appConfig:
           management:
-            {{- if .Values.monitoring.enabled }}
             otlp:
               tracing:
                 endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
-            {{- end }}
           spring:
             datasource:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
