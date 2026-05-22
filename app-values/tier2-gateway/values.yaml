@@ -1,8 +1,0 @@
-profile: authority
-
-keypair:
-  algorithm: EC
-
-redis:
-  port: "6379"
-  username: "default"

@@ -1,43 +1,48 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 'authority-deployer'             # name of the deploying app in argocd
-  namespace: argocd                        # namespace of your argocd
+  name: authority-deployer
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git'
-    path: charts
-    targetRevision: main                  # version of package
+    repoURL: https://code.europa.eu/api/v4/projects/902/packages/helm/stable
+    path: '""'
+    targetRevision: 3.0.0-F-feature-splits.821.0312ac0c
     helm:
+      parameters:
+        - name: authority_iaa.extraValues.tier1_gateway.targetRevision
+          value: 2.7.0
       values: |
-        singleNode: true
-        authInitAutomation: true       # Toggle automated Governance Authority initialization job
-        values:
-          branch: main                 # branch of repo with values - for released version it should be the release branch
-        project: default                    # Project to which the namespace is attached
+        project: default
         namespaceTag: 
-          authority: authority            # identifier of deployment and part of fqdn for this agent
-          common: common                  # identifier of deployment and part of fqdn for common components
-        domainSuffix: ds.helsinki.tfds.io           # last part of fqdn
+          authority: authority
+          common: common
+        domainSuffix: ds.helsinki.tfds.io
         organization:
           name: "FVH"
           unit: "Data"
           country: "FI"
-        resourcePreset: low             # set to "low" to disable requests of resources
         argocd:
-          appname: authority              # name of generated argocd app 
-          namespace: argocd                 # namespace of your argocd
+          appname: authority
+          namespace: argocd
         cluster:
           address: https://kubernetes.default.svc
-          namespace: authority             # where the app will be deployed
-          commonToolsNamespace: common      # namespace where main monitoring stack is deployed
-          issuer: dev-prod            # certificate issuer name
+          namespace: authority
+          commonToolsNamespace: common
+          issuer: dev-prod
         secrets:
-          role: example-role                # role created in OpenBao for access
-          secretEngine: example            # container for secrets in your OpenBao
+          role: example-role
+          secretEngine: example
         monitoring:
-          enabled: false                     # you can set it to false if you don't have common monitoring stack
+          enabled: false
+        authority_iaa:
+          extraValues:
+            development:
+              enableAutomaticInitialization: false
+            tier2_gateway:
+              targetRevision: 2.7.0  
+        resourcePreset: low
+    chart: authority
   destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: authority                  # where the package will be deployed
+    server: https://kubernetes.default.svc
+    namespace: authority
