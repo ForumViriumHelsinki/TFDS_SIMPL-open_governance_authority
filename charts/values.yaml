@@ -27,15 +27,14 @@ authority_iaa:
   repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authority-iaa.git"
   targetRevision: "fix/vault-webhook-injection-v3.1.0"
   path: "charts"
-  chart_name: authority-iaa
-  valuesBranch: v1.2.17
+  valuesBranch: "fix/vault-webhook-injection-v3.1.0"
 
 authority_gaia_x_edc:
   enabled: true
   repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authority_gaia_x_edc.git"
-  targetRevision: "main"
+  targetRevision: "fix/vault-webhook-injection-v3.1.0"
   path: "charts"
-  valuesBranch: "main"
+  valuesBranch: "fix/vault-webhook-injection-v3.1.0"
 
 authority_monitoring:
   enabled: true
