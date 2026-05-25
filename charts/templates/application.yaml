@@ -1,0 +1,105 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.argocd.appname }}
+  namespace: {{ .Values.argocd.namespace }}
+spec:
+  syncPolicy:
+    automated:
+      enabled: false
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+      - ServerSideApply=true
+  project: {{ .Values.project }}
+  destination:
+    server: {{ .Values.cluster.address }}
+    namespace: {{ .Values.cluster.namespace }}
+  sources:
+  {{- if .Values.authority_iaa.enabled }}
+  - repoURL: {{ .Values.authority_iaa.repoURL }}
+    path: {{ .Values.authority_iaa.path }}
+    targetRevision: {{ .Values.authority_iaa.targetRevision }}
+    helm:
+      values: |
+        values:
+          branch: {{ .Values.authority_iaa.valuesBranch }}
+        project: {{ .Values.project }}
+        namespaceTag:
+          authority: {{ .Values.namespaceTag.authority }}
+          common: {{ .Values.namespaceTag.common }}
+        domainSuffix: {{ .Values.domainSuffix }}
+        argocd:
+          appname: {{ .Values.namespaceTag.authority }}-authority-iaa
+          namespace: {{ .Values.argocd.namespace }}
+        cluster:
+          address: {{ .Values.cluster.address }}
+          namespace: {{ .Values.cluster.namespace }}
+          commonToolsNamespace: {{ .Values.cluster.commonToolsNamespace }}
+          issuer: {{ .Values.cluster.issuer }}
+        secrets:
+          role: {{ .Values.secrets.role }}
+          secretEngine: {{ .Values.secrets.secretEngine }}
+        resourcePreset: {{ .Values.resourcePreset }}
+        {{- if .Values.authority_iaa.extraValues }}
+          {{- toYaml .Values.authority_iaa.extraValues  | nindent 8 }}
+        {{- end }}
+  {{- end }}
+  {{- if .Values.authority_gaia_x_edc.enabled }}
+  - repoURL: {{ .Values.authority_gaia_x_edc.repoURL }}
+    path: {{ .Values.authority_gaia_x_edc.path }}
+    targetRevision: {{ .Values.authority_gaia_x_edc.targetRevision }}
+    helm:
+      values: |
+        values:
+          branch: {{ .Values.authority_gaia_x_edc.valuesBranch }}
+        project: {{ .Values.project }}
+        namespaceTag:
+          authority: {{ .Values.namespaceTag.authority }}
+          common: {{ .Values.namespaceTag.common }}
+        domainSuffix: {{ .Values.domainSuffix }}
+        argocd:
+          appname: {{ .Values.namespaceTag.authority }}-authority-gaia-x-edc
+          namespace: {{ .Values.argocd.namespace }}
+        cluster:
+          address: {{ .Values.cluster.address }}
+          namespace: {{ .Values.cluster.namespace }}
+          commonToolsNamespace: {{ .Values.cluster.commonToolsNamespace }}
+          issuer: {{ .Values.cluster.issuer }}
+        secrets:
+          role: {{ .Values.secrets.role }}
+          secretEngine: {{ .Values.secrets.secretEngine }}
+        resourcePreset: {{ .Values.resourcePreset }}
+        {{- if .Values.authority_gaia_x_edc.extraValues }}
+          {{- toYaml .Values.authority_gaia_x_edc.extraValues  | nindent 8 }}
+        {{- end }}
+  {{- end }}
+  {{- if .Values.authority_monitoring.enabled }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.authority_monitoring.projectID }}/packages/helm/stable"
+    targetRevision: {{ .Values.authority_monitoring.targetRevision }}
+    chart: {{ .Values.authority_monitoring.chart_name }}
+    helm:
+      values: |
+        values:
+          branch: {{ .Values.authority_monitoring.valuesBranch }}
+        project: {{ .Values.project }}
+        namespaceTag:
+          authority: {{ .Values.namespaceTag.authority }}
+          common: {{ .Values.namespaceTag.common }}
+        domainSuffix: {{ .Values.domainSuffix }}
+        argocd:
+          appname: {{ .Values.namespaceTag.authority }}-authority-monitoring
+          namespace: {{ .Values.argocd.namespace }}
+        cluster:
+          address: {{ .Values.cluster.address }}
+          namespace: {{ .Values.cluster.namespace }}
+          commonToolsNamespace: {{ .Values.cluster.commonToolsNamespace }}
+          issuer: {{ .Values.cluster.issuer }}
+        secrets:
+          role: {{ .Values.secrets.role }}
+          secretEngine: {{ .Values.secrets.secretEngine }}
+        resourcePreset: {{ .Values.resourcePreset }}
+        {{- if .Values.authority_monitoring.extraValues }}
+          {{- toYaml .Values.authority_monitoring.extraValues  | nindent 8 }}
+        {{- end }}
+  {{- end }}

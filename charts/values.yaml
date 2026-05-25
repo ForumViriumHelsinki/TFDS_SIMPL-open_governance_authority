@@ -1,0 +1,45 @@
+project: ${PROJECT}
+domainSuffix: ${DOMAINSUFFIX}
+identifierNumber: ${IDENTIFIERNUMBER}
+namespaceTag:
+  authority: ${AUTHNAMESPACETAG}
+  common: ${COMMONSPACETAG}
+
+resourcePreset: default
+# resourcePreset: low
+
+argocd:
+  appname: ${NAMESPACE}
+  namespace: ${ARGOCDNAMESPACE}
+
+cluster:
+  address: https://kubernetes.default.svc
+  namespace: ${NAMESPACE}
+  commonToolsNamespace: ${COMMONNAMESPACE}
+  issuer: ${CLUSTERISSUER}
+
+secrets:
+  role: ${SECRETROLE}
+  secretEngine: ${SECRETENGINE}
+
+authority_iaa:
+  enabled: true
+  repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authority-iaa.git"
+  targetRevision: "fix/vault-webhook-injection-v3.1.0"
+  path: "charts"
+  chart_name: authority-iaa
+  valuesBranch: v1.2.17
+
+authority_gaia_x_edc:
+  enabled: true
+  repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_authority_gaia_x_edc.git"
+  targetRevision: "main"
+  path: "charts"
+  valuesBranch: "main"
+
+authority_monitoring:
+  enabled: true
+  projectID: "1394"
+  targetRevision: 0.0.6
+  chart_name: authority-monitoring
+  valuesBranch: v0.0.6
