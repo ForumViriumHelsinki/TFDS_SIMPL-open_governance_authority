@@ -9,9 +9,6 @@ spec:
     path: '""'
     targetRevision: 3.0.0-F-feature-splits.821.0312ac0c
     helm:
-      parameters:
-        - name: authority_iaa.extraValues.tier1_gateway.targetRevision
-          value: 2.7.0
       values: |
         project: default
         namespaceTag: 
@@ -39,8 +36,30 @@ spec:
           extraValues:
             development:
               enableAutomaticInitialization: false
-            tier2_gateway:
-              targetRevision: 2.7.0  
+            keycloak:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            ejbca-community-helm:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            identity-provider:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            authentication-provider:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            security-attributes-provider:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            users-roles:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            onboarding:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
+            tier1-gateway:
+              podAnnotations:
+                vault.security.banzaicloud.io/vault-skip-verify: "true"
         resourcePreset: low
     chart: authority
   destination:
