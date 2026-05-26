@@ -1,8 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 
-NAMESPACE=${1:-"dataprovider"}
-DOMAIN_SUFFIX=${2:-"idea.helsinki.tfds.io"}
+NAMESPACE=${1:-"authority"}
+DOMAIN_SUFFIX=${2:-"ds.helsinki.tfds.io"}
 
 echo "========================================================"
 echo " Single Node Setup - $NAMESPACE"
@@ -39,6 +39,39 @@ spec:
             name: tier2-gateway
             port:
               number: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: neo4j-browser-ingress
+  namespace: $NAMESPACE
+  annotations:
+    cert-manager.io/cluster-issuer: dev-prod
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - catalogue-db.authority.$NAMESPACE.$DOMAIN_SUFFIX
+    secretName: neo4j-browser-tls
+  rules:
+  - host: catalogue-db.authority.$NAMESPACE.$DOMAIN_SUFFIX
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: xsfc-neo4j-db-lb-neo4j
+            port:
+              number: 7474
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  "7687": "$NAMESPACE/xsfc-neo4j-db-lb-neo4j:7687"
 EOF
 
 echo "-> Setup complete for $NAMESPACE!"
