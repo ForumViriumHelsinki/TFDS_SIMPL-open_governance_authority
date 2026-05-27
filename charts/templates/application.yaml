@@ -850,6 +850,8 @@ spec:
           simpl:
             certificate:
               san: "tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+          openid-connect:
+            certsEndpoint: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth/realms/authority/protocol/openid-connect/certs"
         env:
         - name: KAFKA_AUTHPROVIDER
           value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_authprovider"
