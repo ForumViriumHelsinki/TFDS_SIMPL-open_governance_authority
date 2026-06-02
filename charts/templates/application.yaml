@@ -77,23 +77,103 @@ spec:
     chart: keycloak
     helm:
       values: |
+        global:
+          security:
+            allowInsecureImages: true
+        image:
+          repository: keycloak/keycloak
+          tag: 26.4
         fullnameOverride: keycloak-{{ .Values.cluster.namespace }}
-        env:
-          KEYCLOAK_ADMIN: admin
+        defaultInitContainers:
+          prepareWriteDirs:
+            enabled: false
+        command:
+          - /opt/keycloak/bin/kc.sh
+        args:
+          - start
+          - --log-level=DEBUG
+          - --import-realm
+          - --verbose
+          - --proxy-headers
+          - xforwarded
+        containerSecurityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+        apiUrl: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+        podAnnotations:
+          vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
+          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
+        auth:
+          adminPassword: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
+        externalDatabase:
+          host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+          database: {{ .Values.namespaceTag.authority }}_keycloak
+          user: {{ .Values.namespaceTag.authority }}_keycloak
+          password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-keycloak"
+        extraEnvVars:
+        - name: KC_HOSTNAME_ADMIN
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KC_HOSTNAME
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: USERS_ROLES_BASE_URL
+          value: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/tier1/v2"
+        - name: KEYCLOAK_BASE_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: AUTHENTICATION_PROVIDER_BASE_URL
+          value: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/tier1/v2"
+        - name: REALM
+          value: "authority"
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
+        - name: KC_DB
+          value: "postgres"
+        - name: KC_DB_URL_HOST
+          value: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+        - name: KC_DB_URL_PORT
+          value: "5432"
+        - name: KC_DB_URL_DATABASE
+          value: {{ .Values.namespaceTag.authority }}_keycloak
+        - name: KC_DB_USERNAME
+          value: {{ .Values.namespaceTag.authority }}_keycloak
+        - name: KC_DB_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-keycloak"
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
+          value: "admin"
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
+        extraVolumes:
+          - name: spi-volume
+            configMap:
+              name: keycloak-spi-configmap
+        extraVolumeMounts:
+          - name: spi-volume
+            mountPath: /opt/keycloak/providers/
         ingress:
+          enabled: true
           annotations:
             cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
+            nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
           ingressClassName: nginx
           tls:
             - secretName: keycloak-{{ .Values.cluster.namespace }}-tls
               hosts:
-                - {{ .Values.keycloak.hosts.internal }}
-                - {{ .Values.keycloak.hosts.external }}
-        extraEnv:
-          - name: KC_HOSTNAME
-            value: https://{{ .Values.keycloak.hosts.external }}
-          - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
-            value: "true"
+                - authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          hostname: authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          pathType: Prefix
+          extraPaths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: keycloak-{{ .Values.cluster.namespace }}
+                  port:
+                    number: 80
         {{- if eq $keycloakHA false }}
         replicaCount: 1
         affinity: {}
@@ -108,8 +188,6 @@ spec:
         resources: {{- toYaml .Values.keycloak.resources | nindent 10 }}
           {{- end }}
         {{- end }}
-  {{- end }}
-
   {{- if .Values.auth_provider.enabled }}
   - repoURL: {{ .Values.monorepo_URL }}
     targetRevision: {{ .Values.monorepo_branch }}
@@ -246,6 +324,14 @@ spec:
     path: charts/fe-users-and-roles
     helm:
       values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -268,6 +354,14 @@ spec:
     path: charts/fe-identity-provider
     helm:
       values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -290,6 +384,14 @@ spec:
     path: charts/fe-onboarding
     helm:
       values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -312,6 +414,14 @@ spec:
     path: charts/fe-security-attribute-provider
     helm:
       values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -334,6 +444,14 @@ spec:
     path: charts/fe-authentication-provider
     helm:
       values: |
+        hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:4203,http://localhost:3000
+        env:
+        - name: API_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -584,6 +702,23 @@ spec:
         - $values/app-values/ejbca/{{ . }}
         {{- end }}
       values: |
+        podAnnotations:
+          vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
+          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
+        fullnameOverride: {{ .Values.ejbca.fullnameOverride }}
+        hostname: &hostname ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local
+        ejbca:
+          env:
+            HTTPSERVER_HOSTNAME: *hostname
+            DATABASE_JDBC_URL: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_ejbca"
+            DATABASE_USER: {{ .Values.cluster.namespace }}_ejbca
+            DATABASE_PASSWORD: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-ejbca
+          initContainers:
+          - name: ejbca-init
+            image: code.europa.eu:4567/simpl/simpl-open/development/iaa/ejbca-preconfig:1.0.3
+            imagePullPolicy: IfNotPresent
         ingress:
           hosts:
             - host: ejbca.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
