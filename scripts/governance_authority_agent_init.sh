@@ -12,7 +12,7 @@ COUNTRY=${COUNTRY:-"FI"}
 PARTICIPANT_TYPE=${PARTICIPANT_TYPE:-"GOVERNANCE_AUTHORITY"}
 
 echo "========================================================"
-echo " Starting Simpl Identity Initialization"
+echo " Starting Simpl Identity Initialization (v3.1.0 API)"
 echo " Target Namespace:  $NAMESPACE"
 echo " Hostname (CN):     $TIER2_HOSTNAME"
 echo " Organization:      $ORG_NAME ($COUNTRY)"
@@ -34,44 +34,60 @@ sleep 10
 
 export AUTHORITY_AUTH_PROVIDER="http://localhost:8080"
 export AUTHORITY_IDENTITY_PROVIDER="http://localhost:8090"
-CSR_FILE="csr.pem"
-CERT_FILE="cert.pem"
+CSR_FILE="csr.json"
+CREDENTIAL_FILE="credential.json"
 
 # Execute Workflow
-echo "-> Generating Keypair..."
-curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate" > /dev/null
+echo "-> 1. Creating Keypair..."
+KEYPAIR_RES=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/tier1/v2/keypairs" \
+  -H 'Content-Type: application/json' \
+  -d '{"name": "initialization-authority"}')
+KEYPAIR_ID=$(echo "$KEYPAIR_RES" | jq -r '.id')
+echo "   Keypair ID: $KEYPAIR_ID"
 
-echo "-> Generating CSR..."
-curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
---header 'Content-Type: application/json' \
---data-raw "{
-  \"commonName\": \"$TIER2_HOSTNAME\",
-  \"country\": \"$COUNTRY\",
-  \"organization\": \"$ORG_NAME\",
-  \"organizationalUnit\": \"$ORG_UNIT\"
-}" > "$CSR_FILE"
+echo "-> 2. Generating CSR..."
+curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/tier1/v2/keypairs/$KEYPAIR_ID/csr" \
+  -H 'Content-Type: application/json' \
+  -d "{
+    \"commonName\": \"$TIER2_HOSTNAME\",
+    \"country\": \"$COUNTRY\",
+    \"organization\": \"$ORG_NAME\",
+    \"organizationalUnit\": \"$ORG_UNIT\"
+  }" > "$CSR_FILE"
 
-echo "-> Creating Participant in Identity Provider..."
-PARTICIPANT_ID=$(curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
---header 'Content-Type: application/json' \
---data-raw "{
-  \"organization\": \"$ORG_NAME\",
-  \"participantType\": \"$PARTICIPANT_TYPE\"
-}" | sed -E 's/^"(.*)"$/\1/')
+echo "-> 3. Creating Participant in Identity Provider..."
+PARTICIPANT_RES=$(curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/tier1/v2/participants" \
+  -H 'Content-Type: application/json' \
+  -d "{
+    \"organization\": \"$ORG_NAME\",
+    \"participantType\": \"$PARTICIPANT_TYPE\",
+    \"isAuthority\": true
+  }")
+PARTICIPANT_ID=$(echo "$PARTICIPANT_RES" | jq -r '.id')
 echo "   Participant ID: $PARTICIPANT_ID"
 
-echo "-> Uploading CSR to Identity Provider..."
-curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
--F "csr=@$CSR_FILE" > /dev/null
+echo "-> 4. Uploading CSR to Identity Provider..."
+curl -s -f -X PUT "$AUTHORITY_IDENTITY_PROVIDER/tier1/v2/participants/$PARTICIPANT_ID/csr" \
+  -H 'Content-Type: application/json' \
+  -d @"$CSR_FILE" > /dev/null
 
-echo "-> Downloading Signed Credential..."
-curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
--o "$CERT_FILE"
+echo "-> 5. Creating Credentials..."
+curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/tier1/v2/participants/$PARTICIPANT_ID/credentials" \
+  -H 'Content-Type: application/json' \
+  -d '{"reason": "INITIALIZATION_REASON"}' > "$CREDENTIAL_FILE"
 
-echo "-> Uploading Signed Credential to Authentication Provider..."
-CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
--F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/')
-echo "   Stored Credential ID: $CREDENTIAL_ID"
+# Extract credential content block from response
+CRED_B64=$(jq -r '.content' "$CREDENTIAL_FILE")
+
+echo "-> 6. Uploading Credentials to Authentication Provider..."
+# Use jq to safely construct the JSON payload to avoid multiline string breakage
+jq -n --arg content "$CRED_B64" '{"reason": "initialization-authority", "content": $content}' > final_payload.json
+
+curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/tier1/v2/credentials" \
+  -H 'Content-Type: application/json' \
+  -d @final_payload.json > /dev/null
+
+rm final_payload.json
 
 echo "========================================================"
 echo " Initialization Complete!"

@@ -1,20 +1,14 @@
-singleNode: ${SINGLENODE}
-authInitAutomation: ${AUTHINITAUTOMATION}
-
-values:
-  repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
-  branch: ${BRANCH}
+monorepo_URL: https://github.com/ForumViriumHelsinki/TFDS-SIMPL-open-helm-charts.git
+monorepo_branch: main
 
 project: ${PROJECT}
 domainSuffix: ${DOMAINSUFFIX}
+identifierNumber: ${IDENTIFIERNUMBER}
 namespaceTag:
   authority: ${AUTHNAMESPACETAG}
   common: ${COMMONSPACETAG}
 
-organization:
-  name: ${ORG_NAME}
-  unit: ${ORG_UNIT}
-  country: ${ORG_COUNTRY}
+singleNode: true
 
 resourcePreset: default
 # resourcePreset: low
@@ -30,27 +24,28 @@ cluster:
   issuer: ${CLUSTERISSUER}
 
 secrets:
-  role:  ${SECRETROLE}
+  role: ${SECRETROLE}
   secretEngine: ${SECRETENGINE}
 
+# ==========================================
+# CONSOLIDATED LEVEL 2 BUNDLE: authority-iaa
+# ==========================================
 keycloak:
-  repo_URL: 'https://charts.bitnami.com/bitnami'
-  chart_name: keycloak
-  targetRevision: 22.2.5
+  enabled: true
+  keycloak_authenticator:
+  eidas_demo_keycloak_extension:
   nameOverride: keycloak
   resourcesPreset: "none"
   resources:
     requests:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1G"
     limits:
-      cpu: "500m"
-      memory: "1Gi"
-  valueFiles:
-    - values.yaml
-
+      cpu: "1"
+      memory: "2G"
 ejbca:
-  repo_URL: 'https://keyfactor.github.io/ejbca-community-helm'
+  enabled: true
+  repo_URL: "https://registry.primekey.com/repository/helm-primekey-enterprise"
   targetRevision: 1.0.7
   chart_name: ejbca-community-helm
   fullnameOverride: ejbca-community-helm
@@ -61,13 +56,8 @@ ejbca:
     limits:
       cpu: "500m"
       memory: "1024Mi"
-  valueFiles:
-    - values.yaml
-
 tier1_gateway:
-  projectID: "772"
-  targetRevision: 2.10.1
-  chart_name: tier1-gateway
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -75,13 +65,8 @@ tier1_gateway:
     limits:
       cpu: "400m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
-
 sap:
-  projectID: "861"
-  targetRevision: 2.10.1
-  chart_name: security-attributes-provider
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -89,13 +74,8 @@ sap:
     limits:
       cpu: "400m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
-
 users_roles:
-  projectID: "771"
-  targetRevision: 2.10.2
-  chart_name: users-roles
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -103,13 +83,8 @@ users_roles:
     limits:
       cpu: "400m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
-
 fe_auth_provider:
-  projectID: "1308"
-  targetRevision: 2.9.2
-  chart_name: fe-authentication-provider
+  enabled: true
   resources:
     requests:
       cpu: "250m"
@@ -117,11 +92,8 @@ fe_auth_provider:
     limits:
       cpu: "250m"
       memory: "512Mi"
-
 fe_users_roles:
-  projectID: "1310"
-  targetRevision: 2.10.1
-  chart_name: fe-users-and-roles
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -129,11 +101,8 @@ fe_users_roles:
     limits:
       cpu: "400m"
       memory: "512Mi"
-
 fe_identity_provider:
-  projectID: "1311"
-  targetRevision: 2.10.6
-  chart_name: fe-identity-provider
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -141,11 +110,8 @@ fe_identity_provider:
     limits:
       cpu: "400m"
       memory: "512Mi"
-
 fe_onboarding:
-  projectID: "1307"
-  targetRevision: 2.10.1
-  chart_name: fe-onboarding
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -155,36 +121,17 @@ fe_onboarding:
       memory: "512Mi"
 
 fe_security_attribute_provider:
-  projectID: "1309"
-  targetRevision: 2.9.2
-  chart_name: fe-security-attribute-provider
-  resources:
-    requests:
-      cpu: "400m"
-      memory: "512Mi"
-    limits:
-      cpu: "400m"
-      memory: "512Mi"
-
-xsfc_catalogue:
   enabled: true
-  projectID: "820"
-  targetRevision: 1.0.12
-  chart_name: fc-service
   resources:
     requests:
-      cpu: "500m"
-      memory: "2Gi"
+      cpu: "400m"
+      memory: "512Mi"
     limits:
-      cpu: "2"
-      memory: "4Gi"
-  valueFiles:
-    - values.yaml
+      cpu: "400m"
+      memory: "512Mi"
 
 onboarding:
-  projectID: "770"
-  targetRevision: 2.10.1
-  chart_name: onboarding
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -193,19 +140,8 @@ onboarding:
       cpu: "1"
       memory: "1Gi"
 
-adapter:
-  enabled: true
-  projectID: "759"
-  targetRevision: 1.0.14
-  chart_name: poc-charts
-  fullnameOverride: adapter
-  valueFiles:
-    - values.yaml
-
 tier2_gateway:
-  projectID: "860"
-  targetRevision: 2.10.0
-  chart_name: tier2-gateway
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -213,15 +149,9 @@ tier2_gateway:
     limits:
       cpu: "400m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
-    - values-routes-authority.yaml
-
 
 identity_provider:
-  projectID: "913"
-  targetRevision: 2.10.0
-  chart_name: identity-provider
+  enabled: true
   fullnameOverride: identity-provider
   resources:
     requests:
@@ -230,13 +160,9 @@ identity_provider:
     limits:
       cpu: "1"
       memory: "1Gi"
-  valueFiles:
-    - values.yaml
 
 auth_provider:
-  projectID: "939"
-  targetRevision: 2.10.1
-  chart_name: authentication-provider
+  enabled: true
   resources:
     requests:
       cpu: "400m"
@@ -244,11 +170,9 @@ auth_provider:
     limits:
       cpu: "500m"
       memory: "1Gi"
-  valueFiles:
-    - values.yaml
-
 redis:
-  repo_URL: 'https://charts.bitnami.com/bitnami'
+  enabled: true
+  repo_URL: "https://charts.bitnami.com/bitnami"
   targetRevision: 19.6.0
   chart_name: redis
   nameOverride: redis
@@ -257,15 +181,10 @@ redis:
     requests:
       cpu: "0"
       memory: "0"
-  valueFiles:
-    - values.yaml
-
 redis_commander:
-  enabled: true
-  repo_URL: 'https://github.com/joeferner/redis-commander.git'
-  targetRevision: master
+  enabled: false
   nameOverride: redis-commander
-  path: 'k8s/helm-chart/redis-commander'
+  path: "k8s/helm-chart/redis-commander"
   resources:
     requests:
       cpu: "500m"
@@ -273,13 +192,8 @@ redis_commander:
     limits:
       cpu: "500m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
-
 tier2_proxy:
-  projectID: "1112"
-  targetRevision: 1.2.1
-  chart_name: tier2-proxy
+  enabled: true
   resources:
     requests:
       cpu: "500m"
@@ -287,12 +201,63 @@ tier2_proxy:
     limits:
       cpu: "500m"
       memory: "500Mi"
+# End services configuration
 
+# Start development configuration
+development:
+  enableTestConfigurations: false
+# End development configuration
+
+# Start postgrest configuration
+# Enabled by value [development.enableTestConfigurations]
+postgrest:
+  databases:
+    - name: "authenticationprovider"
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_authenticationprovider"
+      user: "{{ .Values.namespaceTag.authority }}_authenticationprovider"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-authenticationprovider"
+      anonRole: "{{ .Values.namespaceTag.authority }}_authenticationprovider"
+      dbPool: 1
+    - name: identityprovider
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_identityprovider"
+      user: "{{ .Values.namespaceTag.authority }}_identityprovider"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-identityprovider"
+      anonRole: "{{ .Values.namespaceTag.authority }}_identityprovider"
+      dbPool: 1
+    - name: onboarding
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_onboarding"
+      user: "{{ .Values.namespaceTag.authority }}_onboarding"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-onboarding"
+      anonRole: "{{ .Values.namespaceTag.authority }}_onboarding"
+      dbPool: 1
+    - name: securityattributesprovider
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_securityattributesprovider"
+      user: "{{ .Values.namespaceTag.authority }}_securityattributesprovider"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-securityattributesprovider"
+      anonRole: "{{ .Values.namespaceTag.authority }}_securityattributesprovider"
+      dbPool: 1
+    - name: usersroles
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_usersroles"
+      user: "{{ .Values.namespaceTag.authority }}_usersroles"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-usersroles"
+      anonRole: "{{ .Values.namespaceTag.authority }}_usersroles"
+      dbPool: 1
+# End postgrest configuration
+
+eidas:
+  enabled: false
 simpl_schema_manager:
   enabled: true
-  projectID: "1124"
-  targetRevision: 0.0.13
-  chart_name: simpl-schema-manager-charts
   fullnameOverride: simpl-schema-manager
   resources:
     requests:
@@ -301,14 +266,9 @@ simpl_schema_manager:
     limits:
       cpu: "500m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
 
 simpl_schema_manager_ui:
   enabled: true
-  projectID: "1257"
-  targetRevision: 1.1.1
-  chart_name: schema-manager-ui
   fullnameOverride: simpl-schema-manager-ui
   resources:
     requests:
@@ -317,19 +277,15 @@ simpl_schema_manager_ui:
     limits:
       cpu: "500m"
       memory: "512Mi"
-  valueFiles:
-    - values.yaml
 
+# ==========================================
+# CONSOLIDATED LEVEL 2 BUNDLE: authority-monitoring
+# ==========================================
 monitoring:
   enabled: true
-  projectID: "828"
-  targetRevision: 0.3.1
-  chart_name: eck-monitoring
   fullnameOverride: elastic
   resources:
     filebeat:
       requests:
         memory: "100Mi"
         cpu: "100m"
-  valueFiles:
-    - values.yaml
