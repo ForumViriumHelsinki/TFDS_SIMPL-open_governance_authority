@@ -1182,5 +1182,3 @@ spec:
             cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
   {{- end }}
 
-nd }}
-
