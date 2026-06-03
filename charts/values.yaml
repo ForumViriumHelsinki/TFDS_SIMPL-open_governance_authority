@@ -1,3 +1,5 @@
+agentList: {}
+
 monorepo_URL: https://github.com/ForumViriumHelsinki/TFDS-SIMPL-open-helm-charts.git
 monorepo_branch: main
 
@@ -110,7 +112,7 @@ fe_identity_provider:
     limits:
       cpu: "400m"
       memory: "512Mi"
-fe_onboarding:
+fe_security_attribute_provider:
   enabled: true
   resources:
     requests:
@@ -120,7 +122,7 @@ fe_onboarding:
       cpu: "400m"
       memory: "512Mi"
 
-fe_security_attribute_provider:
+fe_onboarding:
   enabled: true
   resources:
     requests:
@@ -182,6 +184,10 @@ redis:
       cpu: "0"
       memory: "0"
 redis_commander:
+  projectID: 1359
+  targetRevision: 0.1.1
+  chart_name: redis-commander
+
   enabled: false
   nameOverride: redis-commander
   path: "k8s/helm-chart/redis-commander"
@@ -256,6 +262,20 @@ postgrest:
 
 eidas:
   enabled: false
+xsfc_catalogue:
+  enabled: true
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "400m"
+      memory: "512Mi"
+
+adapter:
+  enabled: true
+  fullnameOverride: adapter
+
 simpl_schema_manager:
   enabled: true
   fullnameOverride: simpl-schema-manager

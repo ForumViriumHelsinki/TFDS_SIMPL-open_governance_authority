@@ -30,8 +30,8 @@ spec:
     server: {{ .Values.cluster.address }}
     namespace: {{ .Values.cluster.namespace }}
   sources:
-  - repoURL: {{ .Values.values.repo_URL }}
-    targetRevision: {{ .Values.values.branch }}
+  - repoURL: {{ .Values.monorepo_URL }}
+    targetRevision: {{ .Values.monorepo_branch }}
     ref: values
 
 
@@ -45,6 +45,38 @@ spec:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
             domainSuffix: {{ .Values.domainSuffix }}
+        env: 
+          - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+            value: "DEBUG"
+          - name: SPRING_JPA_SHOW_SQL
+            value: "false"
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-securityattributesprovider
+          - name: SPRING_DATA_REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secrets
+                key: redis
+        microservices:
+          identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          onboardingUrl: http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        appConfig:
+          spring: 
+            data:
+              redis:
+                host: redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local
+            datasource:
+              url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_securityattributesprovider"
+              username: {{ .Values.namespaceTag.authority }}_securityattributesprovider 
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+          simpl:
+            ephemeral-proof:
+              issuer-url: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          otlp:
+            tracing:
+              endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -188,6 +220,7 @@ spec:
         resources: {{- toYaml .Values.keycloak.resources | nindent 10 }}
           {{- end }}
         {{- end }}
+  {{- end }}
   {{- if .Values.auth_provider.enabled }}
   - repoURL: {{ .Values.monorepo_URL }}
     targetRevision: {{ .Values.monorepo_branch }}
@@ -197,6 +230,63 @@ spec:
         config:
           agentType: authority
           identifierNumber: {{ .Values.identifierNumber }}
+        appConfig:
+          management:
+            otlp:
+              tracing:
+                endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+          spring:
+            datasource:
+              url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
+              username: {{ .Values.namespaceTag.authority }}_authenticationprovider
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+            data:
+              redis:
+                host: "redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local"
+          microservice:
+            identity-provider:
+              url: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+            security-attributes-provider:
+              url: http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          client:
+            authority:
+              url: "https://tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+          simpl:
+            certificate:
+              san: "tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+          openid-connect:
+            certsEndpoint: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth/realms/authority/protocol/openid-connect/certs"
+        env:
+        - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+          value: "DEBUG"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        - name: KAFKA_AUTHPROVIDER
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_authprovider"
+        - name: SPRING_DATA_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secrets
+              key: redis
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-authenticationprovider"
+        kafkaConfig:
+          spring:
+            kafka:
+              bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
+              producer:
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_authprovider" password="${KAFKA_AUTHPROVIDER}";
+              admin:
+                auto-create: true
+          simpl:
+            kafka:
+              topic:
+                prefix: iaa.{{ .Values.cluster.namespace }}.
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -217,6 +307,34 @@ spec:
       values: |
         config:
           authProviderInternalUrl: http://authentication-provider-{{ .Values.cluster.namespace }}.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        env: 
+          - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+            value: "DEBUG"
+          - name: SPRING_JPA_SHOW_SQL
+            value: "false"
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-identityprovider
+          - name: SPRING_SSL_BUNDLE_JKS_EJBCA_KEYSTORE_PASSWORD
+            value: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-ejbca#keystorepass
+          - name: SPRING_DATA_REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secrets
+                key: redis
+        appConfig:
+          ejbca:
+            url: "https://ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local:30443"
+          spring:
+            datasource:
+              url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_identityprovider"
+              username: {{ .Values.namespaceTag.authority }}_identityprovider
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+          management:
+            otlp:
+              tracing:
+                endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -235,22 +353,137 @@ spec:
     path: charts/tier1-gateway
     helm:
       values: |
-        config:
-          backend:
-            http:
-              provider: http://authentication-provider-{{ .Values.cluster.namespace }}.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
-          ingress:
-            annotations:
-              cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
-            hosts:
-              - host: auth.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
-                paths:
-                  - path: /
-                    pathType: Prefix
-            tls:
-              - secretName: {{ .Values.tier1_gateway.ingress.secretName }}-tls
-                hosts:
-                  - auth.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        hostT1: authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        cors:
+          allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:3000
+        ingress:
+          issuer: {{ .Values.cluster.issuer }}
+        usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        securityAttributesProviderUrl: http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        keycloakUrl: http://keycloak.{{ .Values.cluster.namespace }}.svc.cluster.local
+        onboardingUrl: http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        ejbcaUrl: http://ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local:30080
+        identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        authenticationProviderUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        env:
+        - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+          value: "DEBUG"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        appConfig:
+          external-routes:
+            spring-route-definitions:
+              - id: fc-service
+                uri: "http://xsfc-service:8081"
+                predicates:
+                - Path=/fc/**
+                filters:
+                - StripPrefix=1
+              - id: schema-manager
+                uri: "http://schema-manager-service:8085"
+                predicates:
+                - Path=/schema-manager/**
+                filters:
+                - StripPrefix=1
+              {{- if .Values.development.enableTestConfigurations }}
+              - id: postgrest-authenticationprovider
+                uri: "http://postgrest-authenticationprovider.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/authenticationprovider/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-identityprovider
+                uri: "http://postgrest-identityprovider.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/identityprovider/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-onboarding
+                uri: "http://postgrest-onboarding.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/onboarding/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-securityattributesprovider
+                uri: "http://postgrest-securityattributesprovider.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/securityattributesprovider/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-usersroles
+                uri: "http://postgrest-usersroles.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/usersroles/**
+                filters:
+                  - StripPrefix=2
+              - id: users-roles-test-cli
+                uri: ${users-roles.url}
+                predicates:
+                  - Path=
+                    /cli/userApi/v1/users,
+                    /cli/userApi/v1/users/*,
+                    /cli/userApi/v1/roles,
+                    /cli/userApi/v1/roles/*,
+                filters:
+                  - StripPrefix=2
+                  - name: ClientCredentialsFilterFactory
+                    args:
+                      cli: cli-
+
+              - id: cleanup-users-with-CLI-v2
+                uri: ${users-roles.url}
+                predicates:
+                  - Path=
+                    /cli/userApi/tier1/v2/users,
+                    /cli/userApi/tier1/v2/users/*,
+                    /cli/userApi/tier1/v2/roles,
+                    /cli/userApi/tier1/v2/roles/*,
+                filters:
+                  - StripPrefix=2
+                  - name: ClientCredentialsFilterFactory
+                    args:
+                      cli: cli-role
+              - id: authenticationprovider-internal
+                uri: ${authentication-provider.url}
+                predicates:
+                  - Path=/internal/authApi/**
+                filters:
+                  - StripPrefix=2
+              - id: identityprovider-internal
+                uri: ${identity-provider.url}
+                predicates:
+                  - Path=/internal/identityApi/**
+                filters:
+                  - StripPrefix=2
+              {{- end }}
+            public-urls:
+              - path: "/schema-manager/**"
+              {{- if .Values.development.enableTestConfigurations }}
+              - path: "/postgrest/**"
+              - path: "/internal/**"
+              {{- end }}
+          jwt-configuration:
+            primary:
+              realm: authority
+            applicant:
+              realm: onboarding
+          microservices-info:
+            microservices:
+            - name: users-roles
+              internalUrl: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/userApi/v1/"
+            - name: sap
+              internalUrl: "http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/sapApi/v1/"
+            - name: identity-provider
+              internalUrl: "http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/identityApi/v1/"
+            - name: onboarding
+              internalUrl: "http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/onboardingApi/v1/"
+            - name: authentication-provider
+              internalUrl: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace}}.{{ .Values.domainSuffix }}/authApi/v1/"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -269,6 +502,45 @@ spec:
     path: charts/tier2-gateway
     helm:
       values: |
+        env:
+        - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+          value: "DEBUG"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        - name: KAFKA_TIER2GW
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_tier2gw"
+        - name: SPRING_DATA_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secrets
+              key: redis
+        global:
+          cors:
+            allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:3000
+        microservices:
+          usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          keycloakUrl: http://keycloak.{{ .Values.cluster.namespace }}.svc.cluster.local
+          securityAttributesProviderUrl: http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          authenticationProviderUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        redis:
+          host: "redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local"
+        hostT2: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        kafkaConfig:
+          spring:
+            kafka:
+              bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
+              consumer:
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_tier2gw" password="${KAFKA_TIER2GW}";
+              admin:
+                auto-create: true
+          simpl:
+            kafka:
+              topic:
+                prefix: iaa.{{ .Values.cluster.namespace }}.
         ingress:
           enabled: true
           annotations:
@@ -280,7 +552,7 @@ spec:
                 - path: /
                   pathType: Prefix
           tls:
-            - secretName: {{ .Values.tier2_gateway.ingress.secretName }}-tls
+            - secretName: tier2-gateway-tls
               hosts:
                 - tier2.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         {{- if eq .Values.resourcePreset "low" }}
@@ -294,29 +566,6 @@ spec:
           {{- end }}
         {{- end }}
   {{- end }}
-
-  {{- if .Values.security_attributes_provider.enabled }}
-  - repoURL: {{ .Values.monorepo_URL }}
-    targetRevision: {{ .Values.monorepo_branch }}
-    path: charts/security-attributes-provider
-    helm:
-      values: |
-        config:
-          app:
-            namespaceTag: {{ .Values.namespaceTag.authority }}
-            domainSuffix: {{ .Values.domainSuffix }}
-        {{- if eq .Values.resourcePreset "low" }}
-        resources:
-          requests:
-            cpu: "0"
-            memory: "0"
-        {{- else }}
-          {{- if .Values.security_attributes_provider.resources }}
-        resources: {{- toYaml .Values.security_attributes_provider.resources | nindent 10 }}
-          {{- end }}
-        {{- end }}
-  {{- end }}
-
 
   {{- if .Values.fe_users_roles.enabled }}
   - repoURL: {{ .Values.monorepo_URL }}
@@ -332,6 +581,12 @@ spec:
         env:
         - name: API_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -362,6 +617,14 @@ spec:
         env:
         - name: API_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
+        - name: EIDAS_ENABLED
+          value: {{ .Values.eidas.enabled | quote }}
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -392,6 +655,16 @@ spec:
         env:
         - name: API_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "onboarding" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
+        - name: EIDAS_ENABLED
+          value: {{ .Values.eidas.enabled | quote }}
+        - name: EIDAS_IDP
+          value: "eidas-demo"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -422,6 +695,12 @@ spec:
         env:
         - name: API_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -452,6 +731,12 @@ spec:
         env:
         - name: API_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/v1"
+        - name: KEYCLOAK_URL
+          value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
+        - name: KEYCLOAK_REALM
+          value: "authority" 
+        - name: KEYCLOAK_CLIENT_ID
+          value: "frontend-cli"
         config:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
@@ -478,6 +763,58 @@ spec:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
             domainSuffix: {{ .Values.domainSuffix }}
+        db:
+          url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_onboarding"
+          username: {{ .Values.namespaceTag.authority }}_onboarding
+          password: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-onboarding
+        env:
+        - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+          value: "DEBUG"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        - name: KAFKA_ONBOARDING
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_onboarding"
+        - name: KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#onboarding_sa"
+        microservices:
+          identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        appConfig:
+          spring:
+            datasource:
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+          eidas:
+            enabled: {{ .Values.eidas.enabled }}
+            integration:
+              type: EIDAS_DEMO
+              properties:
+                user-info-endpoint: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/auth/realms/onboarding/protocol/openid-connect/userinfo"
+          email-service:
+            onboarding-request-url:
+              applicant-url-template: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/onboarding/application/additional-request
+              notary-url-template: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/onboarding/administration/{id}
+          keycloak:
+            url: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/auth"
+            realm: onboarding
+            service-account:
+              client-id: onboarding-sa
+        kafkaConfig:
+          spring:
+            kafka:
+              bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
+              producer:
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_onboarding" password="${KAFKA_ONBOARDING}";
+              admin:
+                auto-create: true
+        simpl:
+          kafka:
+            topic:
+              prefix: iaa.{{ .Values.cluster.namespace }}.
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -518,6 +855,68 @@ spec:
           app:
             namespaceTag: {{ .Values.namespaceTag.authority }}
             domainSuffix: {{ .Values.domainSuffix }}
+        hostT1: authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        authorityHostT2: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+        global:
+          ingress:
+            issuer: {{ .Values.cluster.issuer }}
+        keycloak:
+          master:
+            password: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin
+        db:
+          url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_usersroles"
+          username: {{ .Values.namespaceTag.authority }}_usersroles
+          password: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-usersroles
+        appConfig:
+          spring:
+            datasource:
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+          notification:
+            role-requests:
+              my-profile-url: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/users-roles/my-profile
+              role-request-review-page: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/users-roles/role-requests-management/review/{roleRequestId}
+        env:
+        - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+          value: "DEBUG"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        - name: KAFKA_USERSROLES
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_usersroles"
+        - name: SPRING_DATA_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secrets
+              key: redis
+        redis:
+          host: "redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local"
+        microservices:
+          authenticationProviderUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        kafkaConfig:
+          spring:
+            kafka:
+              bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
+              producer:
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_usersroles" password="${KAFKA_USERSROLES}";
+              consumer:
+                group-id: users-roles
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_usersroles" password="${KAFKA_USERSROLES}";
+              admin:
+                auto-create: true
+          simpl:
+            kafka:
+              topic:
+                prefix: iaa.{{ .Values.cluster.namespace }}.
+              inbox:
+                topic:
+                  pattern: iaa\.{{ .Values.cluster.namespace }}\..*
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -540,6 +939,16 @@ spec:
     path: charts/simpl-schema-manager-charts
     helm:
       values: |
+        ingress:
+          host: schema-manager-be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          clusterIssuer: {{ .Values.cluster.issuer }}
+        hashicorp:
+          service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
+          role: {{ .Values.secrets.role }}
+          secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.namespaceTag.authority }}-simpl-schema-manager"
+        t2proxy:
+          httpProxyHost: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local"
+          proxyUrl: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local:3000"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -549,12 +958,6 @@ spec:
           {{- if .Values.simpl_schema_manager.resources }}
         resources: {{- toYaml .Values.simpl_schema_manager.resources | nindent 10 }}
           {{- end }}
-        {{- end }}
-  {{- end }}
-
-        {{- end }}
-  {{- end }}
-
         {{- end }}
   {{- end }}
 
@@ -575,7 +978,7 @@ spec:
         clusterIssuer_internal: {{ .Values.cluster.internalIssuer }}
         domainSuffix: {{ .Values.domainSuffix }}
         namespaceTag: {{ .Values.namespaceTag.authority }}
-        mainNamespace: {{ .Values.namespaceTag.authority }}
+        mainNamespace: {{ .Values.cluster.commonToolsNamespace }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -588,7 +991,7 @@ spec:
   {{- if .Values.xsfc_catalogue.enabled }}
   - repoURL: {{ .Values.monorepo_URL }}
     targetRevision: {{ .Values.monorepo_branch }}
-    path: charts/xfsc-advsearch
+    path: charts/fc-service
     helm:
       values: |
         global:
