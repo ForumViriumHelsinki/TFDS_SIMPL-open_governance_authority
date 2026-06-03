@@ -42,7 +42,7 @@ spec:
             domainSuffix: {{ .Values.domainSuffix }}
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         env: 
@@ -136,7 +136,7 @@ spec:
         apiUrl: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         auth:
@@ -216,7 +216,8 @@ spec:
             cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
             nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
           ingressClassName: nginx
-          tls:
+          tls: true
+          extraTls:
             - secretName: keycloak-{{ .Values.cluster.namespace }}-tls
               hosts:
                 - authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
@@ -256,7 +257,7 @@ spec:
           identifierNumber: {{ .Values.identifierNumber }}
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         appConfig:
@@ -338,7 +339,7 @@ spec:
           authProviderInternalUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         env: 
@@ -550,7 +551,7 @@ spec:
               key: redis
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         global:
@@ -808,7 +809,7 @@ spec:
           password: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-onboarding
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         env:
@@ -903,7 +904,7 @@ spec:
         authorityHostT2: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         global:
@@ -993,7 +994,7 @@ spec:
           clusterIssuer: {{ .Values.cluster.issuer }}
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          role: {{ .Values.secrets.role }}
+          role: "{{ .Values.secrets.role }}"
           secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.namespaceTag.authority }}-simpl-schema-manager"
         t2proxy:
           httpProxyHost: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local"
@@ -1045,7 +1046,7 @@ spec:
       values: |
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         global:
@@ -1057,7 +1058,7 @@ spec:
             cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          role: {{ .Values.secrets.role }}
+          role: "{{ .Values.secrets.role }}"
           secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
         secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-xsfc-service"  
         ingress:
@@ -1089,7 +1090,7 @@ spec:
           enabled: false
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          role: {{ .Values.secrets.role }}
+          role: "{{ .Values.secrets.role }}"
           secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
         secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-adapter-simpl-backend"   
   {{- end }}        
@@ -1153,7 +1154,7 @@ spec:
       values: |
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
-          vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-role: "{{ .Values.secrets.role }}"
           vault.security.banzaicloud.io/vault-path: kubernetes
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         fullnameOverride: {{ .Values.ejbca.fullnameOverride }}
