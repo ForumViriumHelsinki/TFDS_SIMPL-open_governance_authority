@@ -161,8 +161,6 @@ spec:
           value: "authority"
         - name: KEYCLOAK_ADMIN
           value: "admin"
-        - name: KEYCLOAK_ADMIN_PASSWORD
-          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
         - name: KC_DB
           value: "postgres"
         - name: KC_DB_URL_HOST
@@ -1162,7 +1160,6 @@ spec:
         ejbca:
           env:
             HTTPSERVER_HOSTNAME: *hostname
-            DATABASE_JDBC_URL: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_ejbca"
             DATABASE_USER: {{ .Values.cluster.namespace }}_ejbca
             DATABASE_PASSWORD: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-ejbca
           initContainers:
