@@ -1139,6 +1139,8 @@ spec:
     helm:
       values: |
         fullnameOverride: {{ .Values.redis.nameOverride }}-{{ .Values.cluster.namespace }}
+        image:
+          tag: "7.2.5"
         {{- if eq $redisHA false }}
         architecture: standalone
         {{- end }}
@@ -1179,4 +1181,6 @@ spec:
           annotations:
             cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
   {{- end }}
+
+nd }}
 
