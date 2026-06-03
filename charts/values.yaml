@@ -48,7 +48,7 @@ keycloak:
       memory: "2G"
 ejbca:
   enabled: true
-  repo_URL: "https://registry.primekey.com/repository/helm-primekey-enterprise"
+  repo_URL: "https://keyfactor.github.io/ejbca-community-helm"
   targetRevision: 1.0.7
   chart_name: ejbca-community-helm
   fullnameOverride: ejbca-community-helm
