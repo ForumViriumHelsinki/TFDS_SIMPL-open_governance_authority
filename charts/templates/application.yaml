@@ -30,11 +30,6 @@ spec:
     server: {{ .Values.cluster.address }}
     namespace: {{ .Values.cluster.namespace }}
   sources:
-  - repoURL: {{ .Values.monorepo_URL }}
-    targetRevision: {{ .Values.monorepo_branch }}
-    ref: values
-
-
   {{- if .Values.sap.enabled }}
   - repoURL: {{ .Values.monorepo_URL }}
     targetRevision: {{ .Values.monorepo_branch }}
@@ -1143,10 +1138,6 @@ spec:
     targetRevision: {{ .Values.redis.targetRevision }}
     chart: {{ .Values.redis.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.redis.valueFiles }}
-        - $values/app-values/redis/{{ . }}
-        {{- end }}
       values: |
         fullnameOverride: {{ .Values.redis.nameOverride }}-{{ .Values.cluster.namespace }}
         {{- if eq $redisHA false }}
@@ -1159,10 +1150,6 @@ spec:
     targetRevision: {{ .Values.ejbca.targetRevision }}
     chart: {{ .Values.ejbca.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.ejbca.valueFiles }}
-        - $values/app-values/ejbca/{{ . }}
-        {{- end }}
       values: |
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
