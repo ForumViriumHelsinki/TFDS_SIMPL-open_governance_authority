@@ -24,6 +24,7 @@ cluster:
   namespace: ${NAMESPACE}
   commonToolsNamespace: ${COMMONNAMESPACE}
   issuer: ${CLUSTERISSUER}
+  internalIssuer: ${INTERNALCLUSTERISSUER}
 
 secrets:
   role: ${SECRETROLE}

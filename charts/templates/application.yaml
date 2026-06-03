@@ -340,7 +340,7 @@ spec:
     helm:
       values: |
         config:
-          authProviderInternalUrl: http://authentication-provider-{{ .Values.cluster.namespace }}.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+          authProviderInternalUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
