@@ -181,11 +181,35 @@ spec:
           value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
         extraVolumes:
           - name: spi-volume
+            emptyDir: {}
+          - name: realm-volume
             configMap:
-              name: keycloak-spi-configmap
+              name: keycloak-realms
         extraVolumeMounts:
           - name: spi-volume
-            mountPath: /opt/keycloak/providers/
+            mountPath: /opt/keycloak/providers
+          - name: realm-volume
+            mountPath: /opt/keycloak/data/import
+        initContainers:
+        - name: init-spi
+          image: curlimages/curl
+          command: ["/bin/sh", "-c"]
+          env:
+            - name: ARTIFACT
+              value: keycloak-authenticator
+            - name: URL
+              value: https://code.europa.eu/api/v4/projects/915/packages/maven/eu/europa/ec/simpl/keycloak-authenticator/2.0.2/keycloak-authenticator-2.0.2.jar
+            - name: EIDAS_EXTENSION_ARTIFACT
+              value: keycloak-eidas-demo-authenticator
+            - name: EIDAS_EXTENSION_URL
+              value: https://code.europa.eu/api/v4/projects/1313/packages/maven/eu/europa/ec/simpl/eidas-demo-keycloak-extension/1.0.3/eidas-demo-keycloak-extension-1.0.3.jar
+          args:
+            - |
+              curl -o /custom-spi/${ARTIFACT}.jar ${URL};
+              curl -o /custom-spi/${EIDAS_EXTENSION_ARTIFACT}.jar ${EIDAS_EXTENSION_URL};
+          volumeMounts:
+          - name: spi-volume
+            mountPath: /custom-spi
         ingress:
           enabled: true
           annotations:
