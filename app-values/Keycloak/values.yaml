@@ -22,13 +22,15 @@ extraVolumes:
   - name: spi-volume
     emptyDir: {}
   - name: realm-volume
-    emptyDir: {}
+    configMap:
+      name: {{ .Values.keycloak.chart_name }}-realms
 
 extraVolumeMounts:
   - name: spi-volume
-    mountPath: /opt/keycloak/providers
+    mountPath: /opt/bitnami/keycloak/providers/keycloak-authenticator.jar
+    subPath: keycloak-authenticator.jar
   - name: realm-volume
-    mountPath: /opt/keycloak/data/import/realm.json
+    mountPath: /opt/bitnami/keycloak/data/import/realm.json
     subPath: realm.json
 
 image:
