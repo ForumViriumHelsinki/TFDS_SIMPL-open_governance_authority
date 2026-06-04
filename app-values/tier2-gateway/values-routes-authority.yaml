@@ -1,36 +1,26 @@
 appConfig:
   external-routes:
     spring-route-definitions:
-      - id: schema-manager-service
-        uri: "http://schema-manager-service:8085"
-        predicates:
-        - Path=/schema-manager/**
-        filters:
-        - StripPrefix=1
       - id: fc-service
         uri: "http://xsfc-service:8081"
         predicates:
-        - Path=/fc/**
+          - Path=/fc/**
         filters:
-        - StripPrefix=1
+          - StripPrefix=1
       - id: adapter-service
         uri: "http://adapter-service:8084"
         predicates:
-        - Path=/adapter/**
+          - Path=/adapter/**
         filters:
-        - StripPrefix=1
+          - StripPrefix=1
+      - id: schema-manager-service
+        uri: "http://schema-manager-service:8085"
+        predicates:
+          - Path=/schema-manager/**
+        filters:
+          - StripPrefix=1
 
     abac:
-      - method: POST
-        path: "/schema-manager/**"
-      - method: GET
-        path: "/schema-manager/**"
-      - method: DELETE
-        path: "/schema-manager/**"
-      - method: "GET"
-        path: "/authApi/v1/info/version"
-        identityAttributes:
-          - CONSUMER
       - method: GET
         path: "/fc/**"
         disable-ephemeral-proof-check: true
@@ -49,21 +39,32 @@ appConfig:
       - method: GET
         path: "/adapter/**"
         disable-ephemeral-proof-check: true
+      - method: POST
+        path: "/schema-manager/**"
+      - method: GET
+        path: "/schema-manager/**"
+      - method: DELETE
+        path: "/schema-manager/**"
+      # Expose authentication provider info version endpoint as ABAC route for testing
+      - method: "GET"
+        path: "/authApi/v1/info/version"
+        identityAttributes:
+          - CONSUMER
 
     logging:
       business:
         - config:
             operations:
-            - PUBLISH_CATALOG
+              - PUBLISH_CATALOG
           method: POST
           path: /fc/self-descriptions/*
         - config:
             operations:
-            - PUBLISH_CATALOG
+              - PUBLISH_CATALOG
           method: POST
           path: /fc/self-descriptions
         - config:
             operations:
-            - SEARCH_CATALOG
+              - SEARCH_CATALOG
           method: POST
           path: /adapter/api/v1/search/*

@@ -4,7 +4,7 @@ appConfig:
   springdoc:
     swagger-ui:
       # add other entries if you want to expose additional openapi
-      urls: 
+      urls:
         - url: /sapApi/openapi/securityattributesprovider-v1.yaml
           name: Security Attributes Provider Service V1
         - url: /onboardingApi/openapi/onboarding-v1.yaml
@@ -18,23 +18,6 @@ appConfig:
         - url: /openapi/tier1gateway-v1.yaml
           name: Application Info V1
 
-  external-routes:
-    spring-route-definitions:
-      - id: fc-service
-        uri: "http://xsfc-service:8081"
-        predicates:
-        - Path=/fc/**
-        filters:
-        - StripPrefix=1
-      - id: schema-manager
-        uri: "http://schema-manager-service:8085"
-        predicates:
-        - Path=/schema-manager/**
-        filters:
-        - StripPrefix=1
-    public-urls:
-      - path: "/schema-manager/**"
-  
   keycloak:
     app:
       realm: authority
