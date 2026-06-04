@@ -28,7 +28,7 @@ extraVolumeMounts:
   - name: spi-volume
     mountPath: /opt/keycloak/providers
   - name: realm-volume
-    mountPath: /opt/keycloak/data/import/realm.json
+    mountPath: /opt/bitnami/keycloak/data/import/realm.json
     subPath: realm.json
 
 image:

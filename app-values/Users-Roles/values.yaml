@@ -17,3 +17,8 @@ databaseSeeding:
     # If you want to start with an empty identity attributes table, set this to false.
     # Ff enabled is set to true and filePath is commented or empty the table will be initialized with the default seeding file.
     enabled: true 
+
+appConfig:
+  spring:
+    liquibase:
+      contexts: test

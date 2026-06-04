@@ -14,4 +14,13 @@ appConfig:
         password: ""
   simpl:
     ephemeral-proof:
-      expire-after: 3m
+      proof-of-possession:
+        signature-algorithm: ECDSA
+        expiration-window:
+          amount: 1
+          chrono-unit: minutes
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

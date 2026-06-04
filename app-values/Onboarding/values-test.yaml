@@ -1,0 +1,7 @@
+appConfig:
+  scheduled-tasks:
+    rejection-of-stale-onboarding-requests:
+      cron: "0,10,20,30,40,50 * * * * *"
+    delete-rejected-onboarding-requests:
+      cron: "0,10,20,30,40,50 * * * * *"
+      retention-time: 30s

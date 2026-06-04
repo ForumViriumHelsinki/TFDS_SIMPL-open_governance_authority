@@ -1,0 +1,48 @@
+{{- $postgrest := .Values.postgrest | default dict }}
+{{- if .Values.development.enableTestConfigurations | default false }}
+{{- range $postgrest.databases | default list }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgrest-{{ tpl .name $ }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgrest-{{ tpl .name $ }}
+  template:
+    metadata:
+      labels:
+        app: postgrest-{{ tpl .name $ }}
+      annotations:
+        vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ $.Values.namespaceTag.common }}.{{ $.Values.domainSuffix }}"
+        vault.security.banzaicloud.io/vault-role: {{ $.Values.secrets.role | quote }}
+        vault.security.banzaicloud.io/vault-skip-verify: "true"
+    spec:
+      containers:
+        - name: postgrest
+          image: postgrest/postgrest:latest
+          env:
+            - name: PGHOST
+              value: {{ tpl .host $ | quote }}
+            - name: PGUSER
+              value: {{ tpl .user $ | quote }}
+            - name: PGPASSWORD
+              value: {{ tpl .password $ | quote }}
+            - name: PGDATABASE
+              value: {{ tpl .database $ | quote }}
+            - name: PGPORT
+              value: {{ tpl .port $ | quote }}
+            - name: PGRST_DB_ANON_ROLE
+              value: {{ tpl .anonRole $ | quote  }}
+            {{- if .jwtSecret }}
+            - name: PGRST_JWT_SECRET
+              value: {{ .jwtSecret | quote  }}
+            {{- end }}
+            - name: PGRST_DB_POOL
+              value: {{ .dbPool | quote  }}
+          ports:
+            - containerPort: 3000
+---
+{{- end }}
+{{- end }}

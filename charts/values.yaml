@@ -36,16 +36,20 @@ secrets:
 keycloak:
   repo_URL: 'https://charts.bitnami.com/bitnami'
   chart_name: keycloak
-  targetRevision: 22.2.5
+  targetRevision: 25.2.0
+  keycloak_authenticator:
+    targetRevision: 2.7.1
+  eidas_demo_keycloak_extension:
+    targetRevision: 0.4.2
   nameOverride: keycloak
   resourcesPreset: "none"
   resources:
     requests:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1G"
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "1"
+      memory: "2G"
   valueFiles:
     - values.yaml
 
@@ -66,7 +70,7 @@ ejbca:
 
 tier1_gateway:
   projectID: "772"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.5
   chart_name: tier1-gateway
   resources:
     requests:
@@ -80,7 +84,7 @@ tier1_gateway:
 
 sap:
   projectID: "861"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.4
   chart_name: security-attributes-provider
   resources:
     requests:
@@ -94,7 +98,7 @@ sap:
 
 users_roles:
   projectID: "771"
-  targetRevision: 2.10.2
+  targetRevision: 2.12.8
   chart_name: users-roles
   resources:
     requests:
@@ -108,7 +112,7 @@ users_roles:
 
 fe_auth_provider:
   projectID: "1308"
-  targetRevision: 2.9.2
+  targetRevision: 2.9.3
   chart_name: fe-authentication-provider
   resources:
     requests:
@@ -120,7 +124,7 @@ fe_auth_provider:
 
 fe_users_roles:
   projectID: "1310"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.5
   chart_name: fe-users-and-roles
   resources:
     requests:
@@ -144,7 +148,7 @@ fe_identity_provider:
 
 fe_onboarding:
   projectID: "1307"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.3
   chart_name: fe-onboarding
   resources:
     requests:
@@ -156,7 +160,7 @@ fe_onboarding:
 
 fe_security_attribute_provider:
   projectID: "1309"
-  targetRevision: 2.9.2
+  targetRevision: 2.9.3
   chart_name: fe-security-attribute-provider
   resources:
     requests:
@@ -169,21 +173,21 @@ fe_security_attribute_provider:
 xsfc_catalogue:
   enabled: true
   projectID: "820"
-  targetRevision: 1.0.12
+  targetRevision: 1.0.17
   chart_name: fc-service
   resources:
     requests:
       cpu: "500m"
-      memory: "2Gi"
+      memory: "0.5Gi"
     limits:
-      cpu: "2"
-      memory: "4Gi"
+      cpu: "1000m"
+      memory: "1Gi"
   valueFiles:
     - values.yaml
 
 onboarding:
   projectID: "770"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.8
   chart_name: onboarding
   resources:
     requests:
@@ -196,7 +200,7 @@ onboarding:
 adapter:
   enabled: true
   projectID: "759"
-  targetRevision: 1.0.14
+  targetRevision: 1.0.20
   chart_name: poc-charts
   fullnameOverride: adapter
   valueFiles:
@@ -204,7 +208,7 @@ adapter:
 
 tier2_gateway:
   projectID: "860"
-  targetRevision: 2.10.0
+  targetRevision: 2.11.4
   chart_name: tier2-gateway
   resources:
     requests:
@@ -220,7 +224,7 @@ tier2_gateway:
 
 identity_provider:
   projectID: "913"
-  targetRevision: 2.10.0
+  targetRevision: 2.11.4
   chart_name: identity-provider
   fullnameOverride: identity-provider
   resources:
@@ -235,7 +239,7 @@ identity_provider:
 
 auth_provider:
   projectID: "939"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.4
   chart_name: authentication-provider
   resources:
     requests:
@@ -278,7 +282,7 @@ redis_commander:
 
 tier2_proxy:
   projectID: "1112"
-  targetRevision: 1.2.1
+  targetRevision: 1.5.5
   chart_name: tier2-proxy
   resources:
     requests:
@@ -291,7 +295,7 @@ tier2_proxy:
 simpl_schema_manager:
   enabled: true
   projectID: "1124"
-  targetRevision: 0.0.13
+  targetRevision: 0.0.20
   chart_name: simpl-schema-manager-charts
   fullnameOverride: simpl-schema-manager
   resources:
@@ -307,7 +311,7 @@ simpl_schema_manager:
 simpl_schema_manager_ui:
   enabled: true
   projectID: "1257"
-  targetRevision: 1.1.1
+  targetRevision: 1.4.1
   chart_name: schema-manager-ui
   fullnameOverride: simpl-schema-manager-ui
   resources:
@@ -323,7 +327,7 @@ simpl_schema_manager_ui:
 monitoring:
   enabled: true
   projectID: "828"
-  targetRevision: 0.3.1
+  targetRevision: 0.5.4
   chart_name: eck-monitoring
   fullnameOverride: elastic
   resources:
@@ -333,3 +337,57 @@ monitoring:
         cpu: "100m"
   valueFiles:
     - values.yaml
+
+eidas:
+  enabled: false
+
+# Start development configuration
+development:
+  enableTestConfigurations: false
+# End development configuration
+
+# Start postgrest configuration
+# Enabled by value [development.enableTestConfigurations]
+postgrest:
+  databases:
+    - name: "authenticationprovider"
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_authenticationprovider"
+      user: "{{ .Values.namespaceTag.authority }}_authenticationprovider"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-authenticationprovider"
+      anonRole: "{{ .Values.namespaceTag.authority }}_authenticationprovider"
+      dbPool: 1
+    - name: identityprovider
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_identityprovider"
+      user: "{{ .Values.namespaceTag.authority }}_identityprovider"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-identityprovider"
+      anonRole: "{{ .Values.namespaceTag.authority }}_identityprovider"
+      dbPool: 1
+    - name: onboarding
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_onboarding"
+      user: "{{ .Values.namespaceTag.authority }}_onboarding"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-onboarding"
+      anonRole: "{{ .Values.namespaceTag.authority }}_onboarding"
+      dbPool: 1
+    - name: securityattributesprovider
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_securityattributesprovider"
+      user: "{{ .Values.namespaceTag.authority }}_securityattributesprovider"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-securityattributesprovider"
+      anonRole: "{{ .Values.namespaceTag.authority }}_securityattributesprovider"
+      dbPool: 1
+    - name: usersroles
+      host: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+      port: "5432"
+      database: "{{ .Values.cluster.namespace }}_usersroles"
+      user: "{{ .Values.namespaceTag.authority }}_usersroles"
+      password: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-usersroles"
+      anonRole: "{{ .Values.namespaceTag.authority }}_usersroles"
+      dbPool: 1
+# End postgrest configuration

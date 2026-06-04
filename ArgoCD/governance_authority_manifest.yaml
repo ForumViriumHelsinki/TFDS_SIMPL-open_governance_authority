@@ -1,22 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 'authority-deployer'             # name of the deploying app in argocd
-  namespace: argocd                        # namespace of your argocd
+  name: "authority-deployer" # name of the deploying app in argocd
+  namespace: argocd # namespace of your argocd
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git'
+    repoURL: "https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git"
     path: charts
-    targetRevision: main                  # version of package
+    targetRevision: feature/2.12.x-update # version of package
     helm:
       values: |
         singleNode: true
-        authInitAutomation: true       # Toggle automated Governance Authority initialization job
+        authInitAutomation: false       # Toggle automated Governance Authority initialization job
         values:
-          branch: main                 # branch of repo with values - for released version it should be the release branch
+          branch: feature/2.12.x-update                 # branch of repo with values - for released version it should be the release branch
         project: default                    # Project to which the namespace is attached
-        namespaceTag: 
+        namespaceTag:
           authority: authority            # identifier of deployment and part of fqdn for this agent
           common: common                  # identifier of deployment and part of fqdn for common components
         domainSuffix: ds.helsinki.tfds.io           # last part of fqdn
@@ -26,7 +26,7 @@ spec:
           country: "FI"
         resourcePreset: low             # set to "low" to disable requests of resources
         argocd:
-          appname: authority              # name of generated argocd app 
+          appname: authority              # name of generated argocd app
           namespace: argocd                 # namespace of your argocd
         cluster:
           address: https://kubernetes.default.svc
@@ -39,5 +39,5 @@ spec:
         monitoring:
           enabled: false                     # you can set it to false if you don't have common monitoring stack
   destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: authority                  # where the package will be deployed
+    server: "https://kubernetes.default.svc"
+    namespace: authority # where the package will be deployed
