@@ -35,4 +35,3 @@ image:
   repository: bitnamilegacy/keycloak
 security:
   allowInsecureImages: true
-  
