@@ -5,18 +5,6 @@ auth:
 postgresql:
   enabled: false
 
-externalDatabase:
-  annotations: {}
-  database: keycloak
-  existingSecret: ""
-  existingSecretDatabaseKey: ""
-  existingSecretHostKey: ""
-  existingSecretPasswordKey: ""
-  existingSecretPortKey: ""
-  existingSecretUserKey: ""
-  password: keycloak
-  port: 5432
-  user: keycloak
 
 extraVolumes:
   - name: spi-volume
