@@ -21,3 +21,44 @@ appConfig:
   keycloak:
     app:
       realm: authority
+
+  external-routes:
+    spring-route-definitions:
+      - id: fc-service
+        uri: "http://xsfc-service:8081"
+        predicates:
+          - Path=/fc/**
+        filters:
+          - StripPrefix=1
+      - id: schema-manager
+        uri: "http://schema-manager-service:8085"
+        predicates:
+          - Path=/schema-manager/**
+        filters:
+          - StripPrefix=1
+    public-urls:
+      - path: "/schema-manager/**"
+
+  jwt-configuration:
+    primary:
+      realm: authority
+    applicant:
+      realm: onboarding
+
+  microservices-info:
+    microservices:
+      - name: users-roles
+        internalUrl: "http://users-roles.authority.svc.cluster.local:8080/v1"
+        detailUrl: "https://authority.be.authority.ds.helsinki.tfds.io/userApi/v1/"
+      - name: sap
+        internalUrl: "http://security-attributes-provider.authority.svc.cluster.local:8080/v1"
+        detailUrl: "https://authority.be.authority.ds.helsinki.tfds.io/sapApi/v1/"
+      - name: identity-provider
+        internalUrl: "http://identity-provider.authority.svc.cluster.local:8080/v1"
+        detailUrl: "https://authority.be.authority.ds.helsinki.tfds.io/identityApi/v1/"
+      - name: onboarding
+        internalUrl: "http://onboarding.authority.svc.cluster.local:8080/v1"
+        detailUrl: "https://authority.be.authority.ds.helsinki.tfds.io/onboardingApi/v1/"
+      - name: authentication-provider
+        internalUrl: "http://authentication-provider.authority.svc.cluster.local:8080/v1"
+        detailUrl: "https://authority.be.authority.ds.helsinki.tfds.io/authApi/v1/"

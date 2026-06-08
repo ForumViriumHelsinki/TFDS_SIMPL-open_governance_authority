@@ -289,45 +289,6 @@ spec:
           value: "DEBUG"
         - name: SPRING_JPA_SHOW_SQL
           value: "false"
-        appConfig:
-          external-routes:
-            spring-route-definitions:
-              - id: fc-service
-                uri: "http://xsfc-service:8081"
-                predicates:
-                - Path=/fc/**
-                filters:
-                - StripPrefix=1
-              - id: schema-manager
-                uri: "http://schema-manager-service:8085"
-                predicates:
-                - Path=/schema-manager/**
-                filters:
-                - StripPrefix=1
-            public-urls:
-              - path: "/schema-manager/**"
-          jwt-configuration:
-            primary:
-              realm: authority
-            applicant:
-              realm: onboarding
-          microservices-info:
-            microservices:
-            - name: users-roles
-              internalUrl: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/userApi/v1/"
-            - name: sap
-              internalUrl: "http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/sapApi/v1/"
-            - name: identity-provider
-              internalUrl: "http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/identityApi/v1/"
-            - name: onboarding
-              internalUrl: "http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/onboardingApi/v1/"
-            - name: authentication-provider
-              internalUrl: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-              detailUrl: "https://authority.be.{{ .Values.cluster.namespace}}.{{ .Values.domainSuffix }}/authApi/v1/"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
