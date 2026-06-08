@@ -32,6 +32,8 @@ spec:
           podAnnotations:
             vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
             vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+            vault.security.banzaicloud.io/vault-path: kubernetes
+            vault.security.banzaicloud.io/vault-skip-verify: "true"
           {{- if .Values.redis.resourcesPreset }}
           resourcesPreset: {{ .Values.redis.resourcesPreset }}
           {{- end }}
@@ -114,6 +116,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         auth:
           adminPassword: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
         externalDatabase:
@@ -210,6 +214,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         fullnameOverride: {{ .Values.ejbca.fullnameOverride }}
         hostname: &hostname ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local
         ejbca:
@@ -490,6 +496,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         microservices:
           identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
           onboardingUrl: http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
@@ -535,6 +543,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         hostT1: authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         authorityHostT2: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         global:
@@ -662,6 +672,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         db:
           url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_onboarding"
           username: {{ .Values.namespaceTag.authority }}_onboarding
@@ -737,6 +749,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         env:
         - name: KAFKA_TIER2GW
           value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_tier2gw"
@@ -845,6 +859,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         appConfig:
           ejbca:
             url: "https://ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local:30443"
@@ -881,6 +897,8 @@ spec:
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
+          vault.security.banzaicloud.io/vault-path: kubernetes
+          vault.security.banzaicloud.io/vault-skip-verify: "true"
         appConfig:
           management:
             otlp:
