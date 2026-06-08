@@ -25,11 +25,12 @@ data:
 
     AUTHORITY_AUTH_PROVIDER="http://authentication-provider:8080"
     AUTHORITY_IDENTITY_PROVIDER="http://identity-provider:8080"
-    CSR_FILE="/tmp/csr.pem"
-    CERT_FILE="/tmp/cert.pem"
+    CSR_FILE="/tmp/csr.json"
+    CREDENTIAL_FILE="/tmp/credential.json"
+    PAYLOAD_FILE="/tmp/final_payload.json"
 
     echo "========================================================"
-    echo " Starting Simpl Identity Initialization"
+    echo " Starting Simpl Identity Initialization (v2 API)"
     echo " Target Namespace:  $NAMESPACE"
     echo " Hostname (CN):     $TIER2_HOSTNAME"
     echo " Organization:      $ORG_NAME ($COUNTRY) - Unit: $ORG_UNIT"
@@ -75,12 +76,13 @@ data:
     # The Identity Provider returns HTTP 409 Conflict ("Authority already initialized")
     # if the system was already fully bootstrapped.
 
-    HTTP_STATUS=$(curl -s -o /tmp/id_response.txt -w "%{http_code}" -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants" \
-    --header 'Content-Type: application/json' \
-    --data-raw "{
-      \"organization\": \"$ORG_NAME\",
-      \"participantType\": \"$PARTICIPANT_TYPE\"
-    }")
+    HTTP_STATUS=$(curl -s -o /tmp/id_response.txt -w "%{http_code}" -X POST "$AUTHORITY_IDENTITY_PROVIDER/tier1/v2/participants" \
+      -H 'Content-Type: application/json' \
+      -d "{
+        \"organization\": \"$ORG_NAME\",
+        \"participantType\": \"$PARTICIPANT_TYPE\",
+        \"isAuthority\": true
+      }")
 
     if grep -q "Authority already initialized" /tmp/id_response.txt || [ "$HTTP_STATUS" = "409" ]; then
       echo "   ✅ Found existing Governance Authority identity (HTTP 409). The data space is already initialized."
@@ -91,55 +93,58 @@ data:
     echo "   No existing Authority found. Proceeding with full PKI initialization..."
 
     # Extract participant ID from successful creation (HTTP 200/201)
-    PARTICIPANT_ID=$(cat /tmp/id_response.txt | sed -E 's/^"(.*)"$/\1/')
-
-    # Execute PKI Workflow
-    echo "-> Generating Keypair..."
-    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/keypairs/generate"
-
-    echo "-> Generating CSR..."
-    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/csr/generate" \
-    --header 'Content-Type: application/json' \
-    --data-raw "{
-      \"commonName\": \"$TIER2_HOSTNAME\",
-      \"country\": \"$COUNTRY\",
-      \"organization\": \"$ORG_NAME\",
-      \"organizationalUnit\": \"$ORG_UNIT\"
-    }" > "$CSR_FILE"
+    # Using awk instead of jq as the image is curlimages/curl based on alpine, but we will add jq to the image below.
+    PARTICIPANT_ID=$(cat /tmp/id_response.txt | jq -r '.id')
 
     echo "   Active Participant ID: $PARTICIPANT_ID"
-    echo "-> Uploading CSR to Identity Provider..."
-    curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/v1/participants/$PARTICIPANT_ID/csr" \
-    -F "csr=@$CSR_FILE"
 
-    echo "-> Downloading Signed Credential..."
-    curl -s -f "$AUTHORITY_IDENTITY_PROVIDER/v1/credentials/$PARTICIPANT_ID/download" \
-    -o "$CERT_FILE" || {
-      echo "   ⚠️ WARNING: Failed to download signed credential."
-    }
+    # Execute PKI Workflow
+    echo "-> 1. Creating Keypair..."
+    KEYPAIR_RES=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/tier1/v2/keypairs" \
+      -H 'Content-Type: application/json' \
+      -d '{"name": "initialization-authority"}')
+    KEYPAIR_ID=$(echo "$KEYPAIR_RES" | jq -r '.id')
+    echo "   Keypair ID: $KEYPAIR_ID"
 
-    echo "-> Uploading Signed Credential to Authentication Provider..."
-    CREDENTIAL_ID=$(curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/v1/credentials" \
-    -F "credential=@$CERT_FILE" | sed -E 's/^"(.*)"$/\1/')
+    echo "-> 2. Generating CSR..."
+    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/tier1/v2/keypairs/$KEYPAIR_ID/csr" \
+      -H 'Content-Type: application/json' \
+      -d "{
+        \"commonName\": \"$TIER2_HOSTNAME\",
+        \"country\": \"$COUNTRY\",
+        \"organization\": \"$ORG_NAME\",
+        \"organizationalUnit\": \"$ORG_UNIT\"
+      }" > "$CSR_FILE"
 
-    if [ -n "$CREDENTIAL_ID" ]; then
-      echo "   Stored Credential ID: $CREDENTIAL_ID"
-      echo ""
-      echo "========================================================"
-      echo " 🎉 FRESH INITIALIZATION COMPLETE!"
-      echo " The Governance Authority identity has been generated."
-      echo "========================================================"
-    else
-      echo ""
-      echo "========================================================"
-      echo " ❌ CRITICAL ERROR: INITIALIZATION FAILED!"
-      echo " The script reached the end of the workflow but failed to"
-      echo " receive a valid Credential ID from the Authentication Provider."
-      echo " This indicates the Governance Authority's identity is incomplete."
-      echo " Check the Identity Provider and EJBCA logs for signing errors."
-      echo "========================================================"
-      exit 1
-    fi
+    echo "-> 3. Uploading CSR to Identity Provider..."
+    curl -s -f -X PUT "$AUTHORITY_IDENTITY_PROVIDER/tier1/v2/participants/$PARTICIPANT_ID/csr" \
+      -H 'Content-Type: application/json' \
+      -d @"$CSR_FILE" > /dev/null
+
+    echo "-> 4. Creating Credentials..."
+    curl -s -f -X POST "$AUTHORITY_IDENTITY_PROVIDER/tier1/v2/participants/$PARTICIPANT_ID/credentials" \
+      -H 'Content-Type: application/json' \
+      -d '{"reason": "INITIALIZATION_REASON"}' > "$CREDENTIAL_FILE"
+
+    # Extract credential content block from response
+    CRED_B64=$(jq -r '.content' "$CREDENTIAL_FILE")
+
+    echo "-> 5. Uploading Credentials to Authentication Provider..."
+    # Use jq to safely construct the JSON payload to avoid multiline string breakage
+    jq -n --arg content "$CRED_B64" '{"reason": "initialization-authority", "content": $content}' > "$PAYLOAD_FILE"
+
+    curl -s -f -X POST "$AUTHORITY_AUTH_PROVIDER/tier1/v2/credentials" \
+      -H 'Content-Type: application/json' \
+      -d @"$PAYLOAD_FILE" > /dev/null
+
+    rm "$PAYLOAD_FILE"
+
+    echo ""
+    echo "========================================================"
+    echo " 🎉 FRESH INITIALIZATION COMPLETE!"
+    echo " The Governance Authority identity has been generated."
+    echo "========================================================"
+
 ---
 apiVersion: batch/v1
 kind: Job
@@ -158,7 +163,8 @@ spec:
       containers:
         - name: init-runner
           image: curlimages/curl:8.7.1
-          command: ["/bin/sh", "/scripts/init.sh"]
+          # Add jq to the container before running the script
+          command: ["/bin/sh", "-c", "apk add --no-cache jq && /scripts/init.sh"]
           volumeMounts:
             - name: script-volume
               mountPath: "/scripts"
