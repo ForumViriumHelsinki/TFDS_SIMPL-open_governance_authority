@@ -119,4 +119,5 @@ spec:
       volumes:
       - name: postconfig-volume
         configMap:
+          defaultMode: 0755
           name: import-ttl-job
