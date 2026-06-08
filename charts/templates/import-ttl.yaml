@@ -112,7 +112,7 @@ spec:
       containers:
       - name: script-runner
         image: quay.io/curl/curl
-        command: ["/bin/sh", "-c", "/postconfig/import-ttl.sh http://xsfc-service:8081 && /postconfig/import-ttl.sh http://simpl-schema-manager-service:8085"]
+        command: ["/bin/sh", "-c", "/postconfig/import-ttl.sh http://xsfc-service:8081 && /postconfig/import-ttl.sh http://schema-manager-service:8085"]
         volumeMounts:
         - name: postconfig-volume
           mountPath: /postconfig
