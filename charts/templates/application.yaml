@@ -514,13 +514,13 @@ spec:
               {{- with .Values.backendExtraGlobalDatasource }}
               {{ . | nindent 14 }}
               {{- end }}
-        simpl:
-          ephemeral-proof:
-            issuer-url: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          simpl:
+            ephemeral-proof:
+              issuer-url: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
           {{- if .Values.monitoring.enabled }}
-          otlp:
-            tracing:
-              endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+            otlp:
+              tracing:
+                endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
           {{- end }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
@@ -720,7 +720,7 @@ spec:
                   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_onboarding" password="${KAFKA_ONBOARDING}";
               admin:
                 auto-create: true
-        simpl:
+          simpl:
           kafka:
             topic:
               prefix: iaa.{{ .Values.cluster.namespace }}.
@@ -872,9 +872,9 @@ spec:
               username: {{ .Values.namespaceTag.authority }}_identityprovider
           management:
             {{- if .Values.monitoring.enabled }}
-            otlp:
-              tracing:
-                endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+              otlp:
+                tracing:
+                  endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
             {{- end }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
@@ -903,9 +903,9 @@ spec:
           vault.security.banzaicloud.io/vault-skip-verify: "true"
         appConfig:
           management:
-            otlp:
-              tracing:
-                endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
+              otlp:
+                tracing:
+                  endpoint: http://collector.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}
           spring:
             datasource:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
