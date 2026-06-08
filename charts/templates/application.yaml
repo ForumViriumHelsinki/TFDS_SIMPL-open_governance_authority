@@ -614,8 +614,8 @@ spec:
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           role: {{ .Values.secrets.role }}
-          secretEngine: {{ .Values.secrets.secretEngine }}
-        secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-xsfc-service"
+          secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
+        secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-xsfc-service"
         ingress:
           enabled: false
         {{- if eq .Values.resourcePreset "low" }}
@@ -813,8 +813,8 @@ spec:
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           role: {{ .Values.secrets.role }}
-          secretEngine: {{ .Values.secrets.secretEngine }}
-        secretConfigPath: "{{ .Values.secrets.secretEngine }}/{{ .Values.cluster.namespace }}-adapter-simpl-backend"
+          secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
+        secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-adapter-simpl-backend"
   {{- end }}
   - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.identity_provider.projectID }}/packages/helm/stable"
     path: ''
