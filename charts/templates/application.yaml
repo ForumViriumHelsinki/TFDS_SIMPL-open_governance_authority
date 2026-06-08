@@ -306,14 +306,6 @@ spec:
                 - StripPrefix=1
             public-urls:
               - path: "/schema-manager/**"
-              {{- if .Values.development.enableTestConfigurations }}
-              # PostgREST routes enabled for testing / cleanup
-              # Please remember to remove this configuration (PostgREST) in production environment, these are for pipelines test only.
-              - path: "/postgrest/**"
-              # Test routes for microservices exposing internal APIs
-              # Please remember to remove this configuration (Internal) in production environment, these are for pipelines test only.
-              - path: "/internal/**"
-              {{- end }}
           jwt-configuration:
             primary:
               realm: authority
