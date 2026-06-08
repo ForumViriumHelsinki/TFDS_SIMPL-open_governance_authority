@@ -990,7 +990,8 @@ spec:
           role: {{ .Values.secrets.role }}
           secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.namespaceTag.authority }}-simpl-schema-manager"
         t2proxy:
-          httpProxyHost: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local"
+          httpProxyHost: ""
+          httpProxyPort: ""
           proxyUrl: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local:3000"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
