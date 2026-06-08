@@ -88,12 +88,29 @@ spec:
         - $values/app-values/Keycloak/{{ . }}
         {{- end }}
       values: |
+        global:
+          security:
+            allowInsecureImages: true
         image:
-          repository: bitnamilegacy/keycloak
-        security:
-          allowInsecureImages: true
+          repository: keycloak/keycloak
+          tag: 26.4
         fullnameOverride: {{ .Values.keycloak.nameOverride }}
-        apiUrl: "https://participant.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+        defaultInitContainers:
+          prepareWriteDirs:
+            enabled: false
+        args:
+          - start
+          - --log-level=DEBUG
+          - --import-realm
+          - --verbose
+          - --proxy-headers
+          - xforwarded
+        containerSecurityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+        apiUrl: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
         podAnnotations:
           vault.security.banzaicloud.io/vault-addr: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           vault.security.banzaicloud.io/vault-role: {{ .Values.secrets.role }}
@@ -110,32 +127,45 @@ spec:
         - name: KC_HOSTNAME
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: USERS_ROLES_BASE_URL
-          value: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080"
+          value: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/tier1/v2"
         - name: KEYCLOAK_BASE_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: AUTHENTICATION_PROVIDER_BASE_URL
-          value: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080"
+          value: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/tier1/v2"
         - name: REALM
           value: "authority"
-        - name: KEYCLOAK_EXTRA_ARGS
-          value: --import-realm
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
+        - name: KC_DB
+          value: "postgres"
+        - name: KC_DB_URL_HOST
+          value: "pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local"
+        - name: KC_DB_URL_PORT
+          value: "5432"
+        - name: KC_DB_URL_DATABASE
+          value: {{ .Values.namespaceTag.authority }}_keycloak
+        - name: KC_DB_USERNAME
+          value: {{ .Values.namespaceTag.authority }}_keycloak
+        - name: KC_DB_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-keycloak"
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
+          value: "admin"
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#admin"
+        extraVolumes:
+          - name: spi-volume
+            emptyDir: {}
+          - name: realm-volume
+            configMap:
+              name: {{ .Values.keycloak.chart_name }}-realms
+        extraVolumeMounts:
+          - name: spi-volume
+            mountPath: /opt/keycloak/providers
+          - name: realm-volume
+            mountPath: /opt/keycloak/data/import
         initContainers:
-        - name: import-realm
-          image: nginx:latest
-          command: ["/bin/sh", "-c"]
-          env:
-            - name: REDIRECT_URIS
-              value: '["https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*", "https://schema-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/*"]'
-            - name: REALM_NAME
-              value: realm
-            - name: URL
-              value: https://code.europa.eu/simpl/simpl-open/development/iaa/charts/-/raw/develop/samples/keycloak-realms/2.1.0/authority-realm-export.json?ref_type=heads
-          args:
-            - |
-              curl ${URL} | envsubst '$REDIRECT_URIS' > /config/${REALM_NAME}.json;
-          volumeMounts:
-            - name: realm-volume
-              mountPath: /config
         - name: init-spi
           image: curlimages/curl
           command: ["/bin/sh", "-c"]
@@ -143,10 +173,15 @@ spec:
             - name: ARTIFACT
               value: keycloak-authenticator
             - name: URL
-              value: https://code.europa.eu/api/v4/projects/915/packages/maven/com/aruba/simpl/keycloak-authenticator/2.2.0/keycloak-authenticator-2.2.0.jar
+              value: https://code.europa.eu/api/v4/projects/915/packages/maven/eu/europa/ec/simpl/keycloak-authenticator/{{ .Values.keycloak.keycloak_authenticator.targetRevision }}/keycloak-authenticator-{{ .Values.keycloak.keycloak_authenticator.targetRevision }}.jar
+            - name: EIDAS_EXTENSION_ARTIFACT
+              value: keycloak-eidas-demo-authenticator
+            - name: EIDAS_EXTENSION_URL
+              value: https://code.europa.eu/api/v4/projects/1313/packages/maven/eu/europa/ec/simpl/eidas-demo-keycloak-extension/{{ .Values.keycloak.eidas_demo_keycloak_extension.targetRevision }}/eidas-demo-keycloak-extension-{{ .Values.keycloak.eidas_demo_keycloak_extension.targetRevision }}.jar
           args:
             - |
               curl -o /custom-spi/${ARTIFACT}.jar ${URL};
+              curl -o /custom-spi/${EIDAS_EXTENSION_ARTIFACT}.jar ${EIDAS_EXTENSION_URL};
           volumeMounts:
           - name: spi-volume
             mountPath: /custom-spi
@@ -244,6 +279,13 @@ spec:
         ejbcaUrl: http://ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local:30080
         identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         authenticationProviderUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+
+        jwt-configuration:
+            primary:
+              realm: authority
+            applicant:
+              realm: onboarding
+
         microservices-info:
           microservices:
           - name: users-roles
@@ -276,10 +318,6 @@ spec:
     targetRevision: {{ .Values.fe_users_roles.targetRevision }}
     chart: {{ .Values.fe_users_roles.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.fe_users_roles.valueFiles }}
-        - $values/app-values/fe-users-roles/{{ . }}
-        {{- end }}
       values: |
         hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         ingress:
@@ -310,10 +348,6 @@ spec:
     targetRevision: {{ .Values.fe_identity_provider.targetRevision }}
     chart: {{ .Values.fe_identity_provider.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.fe_identity_provider.valueFiles }}
-        - $values/app-values/fe-identity-provider/{{ . }}
-        {{- end }}
       values: |
         hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         ingress:
@@ -329,6 +363,8 @@ spec:
           value: "authority"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
+        - name: EIDAS_ENABLED
+          value: {{ .Values.eidas.enabled | quote }}
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -344,10 +380,6 @@ spec:
     targetRevision: {{ .Values.fe_onboarding.targetRevision }}
     chart: {{ .Values.fe_onboarding.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.fe_onboarding.valueFiles }}
-        - $values/app-values/fe-onboarding/{{ . }}
-        {{- end }}
       values: |
         hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         ingress:
@@ -360,9 +392,13 @@ spec:
         - name: KEYCLOAK_URL
           value: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/auth"
         - name: KEYCLOAK_REALM
-          value: "authority"
+          value: "onboarding"
         - name: KEYCLOAK_CLIENT_ID
           value: "frontend-cli"
+        - name: EIDAS_ENABLED
+          value: {{ .Values.eidas.enabled | quote }}
+        - name: EIDAS_IDP
+          value: "eidas-demo"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
@@ -378,10 +414,6 @@ spec:
     targetRevision: {{ .Values.fe_security_attribute_provider.targetRevision }}
     chart: {{ .Values.fe_security_attribute_provider.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.fe_security_attribute_provider.valueFiles }}
-        - $values/app-values/fe-security-attribute-provider/{{ . }}
-        {{- end }}
       values: |
         hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         ingress:
@@ -412,10 +444,6 @@ spec:
     targetRevision: {{ .Values.fe_auth_provider.targetRevision }}
     chart: {{ .Values.fe_auth_provider.chart_name }}
     helm:
-      valueFiles:
-        {{- range .Values.fe_auth_provider.valueFiles }}
-        - $values/app-values/fe-auth-provider/{{ . }}
-        {{- end }}
       values: |
         hostFe: authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
         ingress:
@@ -473,19 +501,12 @@ spec:
             datasource:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_securityattributesprovider"
               username: {{ .Values.namespaceTag.authority }}_securityattributesprovider
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
         simpl:
           ephemeral-proof:
             issuer-url: tls.authority.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
-            expire-after: 3m
-            proof-of-possession:
-              signature-algorithm: ECDSA
-              expiration-window:
-                amount: 1
-                chrono-unit: minutes
-        management:
-          tracing:
-            sampling:
-              probability: 1.0
           {{- if .Values.monitoring.enabled }}
           otlp:
             tracing:
@@ -526,6 +547,16 @@ spec:
           url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_usersroles"
           username: {{ .Values.namespaceTag.authority }}_usersroles
           password: vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-postgres-passwords#{{ .Values.cluster.namespace }}-usersroles
+        appConfig:
+          spring:
+            datasource:
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+          notification:
+            role-requests:
+              my-profile-url: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/users-roles/my-profile
+              role-request-review-page: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/users-roles/role-requests-management/review/{roleRequestId}
         env:
         - name: KAFKA_USERSROLES
           value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_usersroles"
@@ -542,6 +573,11 @@ spec:
           spring:
             kafka:
               bootstrap-servers: kafka.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:9092
+              producer:
+                properties:
+                  security.protocol: SASL_PLAINTEXT
+                  sasl.mechanism: PLAIN
+                  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.cluster.namespace }}_usersroles" password="${KAFKA_USERSROLES}";
               consumer:
                 group-id: users-roles
                 properties:
@@ -633,14 +669,32 @@ spec:
         env:
         - name: KAFKA_ONBOARDING
           value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.commonToolsNamespace }}-kafka-credentials#{{ .Values.cluster.namespace }}_onboarding"
+        - name: KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET
+          value: "vault:{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-keycloak#onboarding_sa"
         microservices:
           identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
           usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         appConfig:
+          spring:
+            datasource:
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
+          eidas:
+            enabled: {{ .Values.eidas.enabled }}
+            integration:
+              type: EIDAS_DEMO
+              properties:
+                user-info-endpoint: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/auth/realms/onboarding/protocol/openid-connect/userinfo"
           email-service:
             onboarding-request-url:
               applicant-url-template: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/onboarding/application/additional-request
               notary-url-template: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/onboarding/administration/{id}
+          keycloak:
+            url: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/auth"
+            realm: onboarding
+            service-account:
+              client-id: onboarding-sa
         kafkaConfig:
           spring:
             kafka:
@@ -836,6 +890,9 @@ spec:
             datasource:
               url: "jdbc:postgresql://pg-cluster.{{ .Values.cluster.commonToolsNamespace }}.svc.cluster.local:5432/{{ .Values.cluster.namespace }}_authenticationprovider"
               username: {{ .Values.namespaceTag.authority }}_authenticationprovider
+              {{- with .Values.backendExtraGlobalDatasource }}
+              {{ . | nindent 14 }}
+              {{- end }}
             data:
               redis:
                 host: "redis-master.{{ .Values.cluster.namespace }}.svc.cluster.local"
@@ -933,7 +990,10 @@ spec:
         hashicorp:
           service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
           role: {{ .Values.secrets.role }}
-          secretEngine: {{ .Values.secrets.secretEngine }}
+          secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.namespaceTag.authority }}-simpl-schema-manager"
+        t2proxy:
+          httpProxyHost: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local"
+          proxyUrl: "tier2-proxy.{{ .Values.cluster.namespace }}.svc.cluster.local:3000"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:

@@ -26,14 +26,12 @@ extraVolumes:
 
 extraVolumeMounts:
   - name: spi-volume
-    mountPath: /opt/bitnami/keycloak/providers/keycloak-authenticator.jar
-    subPath: keycloak-authenticator.jar
+    mountPath: /opt/keycloak/providers
   - name: realm-volume
-    mountPath: /opt/bitnami/keycloak/data/import/realm.json
+    mountPath: /opt/keycloak/data/import/realm.json
     subPath: realm.json
 
 image:
   repository: bitnamilegacy/keycloak
 security:
   allowInsecureImages: true
-  

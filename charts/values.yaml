@@ -30,27 +30,32 @@ cluster:
   issuer: ${CLUSTERISSUER}
 
 secrets:
-  role:  ${SECRETROLE}
+  role: ${SECRETROLE}
   secretEngine: ${SECRETENGINE}
-
+#
 keycloak:
-  repo_URL: 'https://charts.bitnami.com/bitnami'
+  enabled: true
+  repo_URL: "https://charts.bitnami.com/bitnami"
   chart_name: keycloak
-  targetRevision: 22.2.5
+  targetRevision: 25.2.0
+  keycloak_authenticator:
+    targetRevision: 2.7.1
+  eidas_demo_keycloak_extension:
+    targetRevision: 0.4.2
   nameOverride: keycloak
   resourcesPreset: "none"
   resources:
     requests:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1G"
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "1"
+      memory: "2G"
   valueFiles:
     - values.yaml
-
+#OK
 ejbca:
-  repo_URL: 'https://keyfactor.github.io/ejbca-community-helm'
+  repo_URL: "https://keyfactor.github.io/ejbca-community-helm"
   targetRevision: 1.0.7
   chart_name: ejbca-community-helm
   fullnameOverride: ejbca-community-helm
@@ -63,10 +68,10 @@ ejbca:
       memory: "1024Mi"
   valueFiles:
     - values.yaml
-
+# NOTE: Values.yaml and application.yaml differ, confirmed that are updated but this needs to be tested.
 tier1_gateway:
   projectID: "772"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.6
   chart_name: tier1-gateway
   resources:
     requests:
@@ -77,10 +82,10 @@ tier1_gateway:
       memory: "512Mi"
   valueFiles:
     - values.yaml
-
+#OK
 sap:
   projectID: "861"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.4
   chart_name: security-attributes-provider
   resources:
     requests:
@@ -91,10 +96,10 @@ sap:
       memory: "512Mi"
   valueFiles:
     - values.yaml
-
+#OK
 users_roles:
   projectID: "771"
-  targetRevision: 2.10.2
+  targetRevision: 2.12.9
   chart_name: users-roles
   resources:
     requests:
@@ -105,10 +110,10 @@ users_roles:
       memory: "512Mi"
   valueFiles:
     - values.yaml
-
+#OK
 fe_auth_provider:
   projectID: "1308"
-  targetRevision: 2.9.2
+  targetRevision: 2.9.3
   chart_name: fe-authentication-provider
   resources:
     requests:
@@ -117,10 +122,10 @@ fe_auth_provider:
     limits:
       cpu: "250m"
       memory: "512Mi"
-
+#OK
 fe_users_roles:
   projectID: "1310"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.5
   chart_name: fe-users-and-roles
   resources:
     requests:
@@ -129,7 +134,7 @@ fe_users_roles:
     limits:
       cpu: "400m"
       memory: "512Mi"
-
+#OK
 fe_identity_provider:
   projectID: "1311"
   targetRevision: 2.10.6
@@ -141,10 +146,10 @@ fe_identity_provider:
     limits:
       cpu: "400m"
       memory: "512Mi"
-
+#OK
 fe_onboarding:
   projectID: "1307"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.3
   chart_name: fe-onboarding
   resources:
     requests:
@@ -153,10 +158,10 @@ fe_onboarding:
     limits:
       cpu: "400m"
       memory: "512Mi"
-
+#OK
 fe_security_attribute_provider:
   projectID: "1309"
-  targetRevision: 2.9.2
+  targetRevision: 2.9.3
   chart_name: fe-security-attribute-provider
   resources:
     requests:
@@ -165,11 +170,11 @@ fe_security_attribute_provider:
     limits:
       cpu: "400m"
       memory: "512Mi"
-
+# OK
 xsfc_catalogue:
   enabled: true
   projectID: "820"
-  targetRevision: 1.0.12
+  targetRevision: 1.0.17
   chart_name: fc-service
   resources:
     requests:
@@ -180,10 +185,10 @@ xsfc_catalogue:
       memory: "4Gi"
   valueFiles:
     - values.yaml
-
+#OK
 onboarding:
   projectID: "770"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.8
   chart_name: onboarding
   resources:
     requests:
@@ -192,19 +197,21 @@ onboarding:
     limits:
       cpu: "1"
       memory: "1Gi"
-
+  valueFiles:
+    - values.yaml
+# OK
 adapter:
   enabled: true
   projectID: "759"
-  targetRevision: 1.0.14
+  targetRevision: 1.0.20
   chart_name: poc-charts
   fullnameOverride: adapter
   valueFiles:
     - values.yaml
-
+#OK
 tier2_gateway:
   projectID: "860"
-  targetRevision: 2.10.0
+  targetRevision: 2.11.4
   chart_name: tier2-gateway
   resources:
     requests:
@@ -216,11 +223,10 @@ tier2_gateway:
   valueFiles:
     - values.yaml
     - values-routes-authority.yaml
-
-
+#OK
 identity_provider:
   projectID: "913"
-  targetRevision: 2.10.0
+  targetRevision: 2.11.4
   chart_name: identity-provider
   fullnameOverride: identity-provider
   resources:
@@ -232,10 +238,10 @@ identity_provider:
       memory: "1Gi"
   valueFiles:
     - values.yaml
-
+#OK
 auth_provider:
   projectID: "939"
-  targetRevision: 2.10.1
+  targetRevision: 2.12.4
   chart_name: authentication-provider
   resources:
     requests:
@@ -246,9 +252,9 @@ auth_provider:
       memory: "1Gi"
   valueFiles:
     - values.yaml
-
+#OK
 redis:
-  repo_URL: 'https://charts.bitnami.com/bitnami'
+  repo_URL: "https://charts.bitnami.com/bitnami"
   targetRevision: 19.6.0
   chart_name: redis
   nameOverride: redis
@@ -259,13 +265,13 @@ redis:
       memory: "0"
   valueFiles:
     - values.yaml
-
+#OK
 redis_commander:
   enabled: true
-  repo_URL: 'https://github.com/joeferner/redis-commander.git'
+  repo_URL: "https://github.com/joeferner/redis-commander.git"
   targetRevision: master
   nameOverride: redis-commander
-  path: 'k8s/helm-chart/redis-commander'
+  path: "k8s/helm-chart/redis-commander"
   resources:
     requests:
       cpu: "500m"
@@ -275,10 +281,10 @@ redis_commander:
       memory: "512Mi"
   valueFiles:
     - values.yaml
-
+#OK
 tier2_proxy:
   projectID: "1112"
-  targetRevision: 1.2.1
+  targetRevision: 1.5.5
   chart_name: tier2-proxy
   resources:
     requests:
@@ -287,11 +293,13 @@ tier2_proxy:
     limits:
       cpu: "500m"
       memory: "500Mi"
-
+  valueFiles:
+    - values.yaml
+#OK
 simpl_schema_manager:
   enabled: true
   projectID: "1124"
-  targetRevision: 0.0.13
+  targetRevision: 0.0.20
   chart_name: simpl-schema-manager-charts
   fullnameOverride: simpl-schema-manager
   resources:
@@ -303,11 +311,11 @@ simpl_schema_manager:
       memory: "512Mi"
   valueFiles:
     - values.yaml
-
+#OK
 simpl_schema_manager_ui:
   enabled: true
   projectID: "1257"
-  targetRevision: 1.1.1
+  targetRevision: 1.4.1
   chart_name: schema-manager-ui
   fullnameOverride: simpl-schema-manager-ui
   resources:
@@ -319,7 +327,7 @@ simpl_schema_manager_ui:
       memory: "512Mi"
   valueFiles:
     - values.yaml
-
+# Not needed in testing
 monitoring:
   enabled: true
   projectID: "828"
@@ -333,3 +341,6 @@ monitoring:
         cpu: "100m"
   valueFiles:
     - values.yaml
+
+eidas:
+  enabled: false
