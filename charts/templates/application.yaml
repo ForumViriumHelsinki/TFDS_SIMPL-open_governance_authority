@@ -277,9 +277,6 @@ spec:
           allowOrigin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }},http://localhost:4202,http://localhost:3000
         ingress:
           issuer: {{ .Values.cluster.issuer }}
-          annotations:
-            nginx.ingress.kubernetes.io/configuration-snippet: |
-              more_set_input_headers 'Origin: https://authority.fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}';
         usersRolesUrl: http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         securityAttributesProviderUrl: http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         keycloakUrl: http://keycloak.{{ .Values.cluster.namespace }}.svc.cluster.local
@@ -287,30 +284,135 @@ spec:
         ejbcaUrl: http://ejbca-community-helm.{{ .Values.cluster.namespace }}.svc.cluster.local:30080
         identityProviderUrl: http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
         authenticationProviderUrl: http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080
+        env:
+        - name: LOGGING_LEVEL_EU_EUROPA_EC_SIMPL
+          value: "DEBUG"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        appConfig:
+          external-routes:
+            spring-route-definitions:
+              - id: fc-service
+                uri: "http://xsfc-service:8081"
+                predicates:
+                - Path=/fc/**
+                filters:
+                - StripPrefix=1
+              - id: schema-manager
+                uri: "http://schema-manager-service:8085"
+                predicates:
+                - Path=/schema-manager/**
+                filters:
+                - StripPrefix=1
+              {{- if .Values.development.enableTestConfigurations }}
+              # PostgREST routes enabled for testing / cleanup
+              # Please remember to remove this configuration (PostgREST) in production environment, these are for pipelines test only.
+              - id: postgrest-authenticationprovider
+                uri: "http://postgrest-authenticationprovider.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/authenticationprovider/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-identityprovider
+                uri: "http://postgrest-identityprovider.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/identityprovider/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-onboarding
+                uri: "http://postgrest-onboarding.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/onboarding/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-securityattributesprovider
+                uri: "http://postgrest-securityattributesprovider.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/securityattributesprovider/**
+                filters:
+                  - StripPrefix=2
+              - id: postgrest-usersroles
+                uri: "http://postgrest-usersroles.{{ .Release.Namespace }}.svc.cluster.local:3000"
+                predicates:
+                  - Path=/postgrest/usersroles/**
+                filters:
+                  - StripPrefix=2
+              # CLI routes enabled for testing / cleanup
+              - id: users-roles-test-cli
+                uri: ${users-roles.url}
+                predicates:
+                  - Path=
+                    /cli/userApi/v1/users,
+                    /cli/userApi/v1/users/*,
+                    /cli/userApi/v1/roles,
+                    /cli/userApi/v1/roles/*,
+                filters:
+                  - StripPrefix=2
+                  - name: ClientCredentialsFilterFactory
+                    args:
+                      cli: cli-
 
-        jwt-configuration:
+              - id: cleanup-users-with-CLI-v2
+                uri: ${users-roles.url}
+                predicates:
+                  - Path=
+                    /cli/userApi/tier1/v2/users,
+                    /cli/userApi/tier1/v2/users/*,
+                    /cli/userApi/tier1/v2/roles,
+                    /cli/userApi/tier1/v2/roles/*,
+                filters:
+                  - StripPrefix=2
+                  - name: ClientCredentialsFilterFactory
+                    args:
+                      cli: cli-role
+              # Test routes for microservices exposing internal APIs
+              # Please remember to remove this configuration (Internal) in production environment, these are for pipelines test only.
+              - id: authenticationprovider-internal
+                uri: ${authentication-provider.url}
+                predicates:
+                  - Path=/internal/authApi/**
+                filters:
+                  - StripPrefix=2
+              - id: identityprovider-internal
+                uri: ${identity-provider.url}
+                predicates:
+                  - Path=/internal/identityApi/**
+                filters:
+                  - StripPrefix=2
+              {{- end }}
+
+            public-urls:
+              - path: "/schema-manager/**"
+              {{- if .Values.development.enableTestConfigurations }}
+              # PostgREST routes enabled for testing / cleanup
+              # Please remember to remove this configuration (PostgREST) in production environment, these are for pipelines test only.
+              - path: "/postgrest/**"
+              # Test routes for microservices exposing internal APIs
+              # Please remember to remove this configuration (Internal) in production environment, these are for pipelines test only.
+              - path: "/internal/**"
+              {{- end }}
+          jwt-configuration:
             primary:
               realm: authority
             applicant:
               realm: onboarding
-
-        microservices-info:
-          microservices:
-          - name: users-roles
-            internalUrl: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-            detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/userApi/v1/"
-          - name: sap
-            internalUrl: "http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-            detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/sapApi/v1/"
-          - name: identity-provider
-            internalUrl: "http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-            detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/identityApi/v1/"
-          - name: onboarding
-            internalUrl: "http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-            detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/onboardingApi/v1/"
-          - name: authentication-provider
-            internalUrl: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
-            detailUrl: "https://authority.be.{{ .Values.cluster.namespace}}.{{ .Values.domainSuffix }}/authApi/v1/"
+          microservices-info:
+            microservices:
+            - name: users-roles
+              internalUrl: "http://users-roles.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/userApi/v1/"
+            - name: sap
+              internalUrl: "http://security-attributes-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/sapApi/v1/"
+            - name: identity-provider
+              internalUrl: "http://identity-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/identityApi/v1/"
+            - name: onboarding
+              internalUrl: "http://onboarding.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace }}.{{ .Values.domainSuffix }}/onboardingApi/v1/"
+            - name: authentication-provider
+              internalUrl: "http://authentication-provider.{{ .Values.cluster.namespace }}.svc.cluster.local:8080/v1"
+              detailUrl: "https://authority.be.{{ .Values.cluster.namespace}}.{{ .Values.domainSuffix }}/authApi/v1/"
         {{- if eq .Values.resourcePreset "low" }}
         resources:
           requests:
