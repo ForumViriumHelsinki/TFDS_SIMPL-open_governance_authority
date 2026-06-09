@@ -66,20 +66,21 @@ data:
       rm "$TMP_FILE"
     }
 
-    # Fetch from the user's Github repository on the configured branch
     BASE_RAW_URL="https://raw.githubusercontent.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority/refs/heads/{{ .Values.values.branch }}/tfds-schemas"
 
     # NOTE: The order is critical! Base SIMPL schemas must be loaded BEFORE TFDS extensions.
 
-    # 1. Base SIMPL Ontology (Patched)
-    seed_schema "${BASE_RAW_URL}/ontology/simpl_ontology_generated.ttl"
+    # 1. Base SIMPL Ontology
+    seed_schema "${BASE_RAW_URL}/ontology/simpl_ontology.ttl"
 
-    # 2. Base SIMPL Shapes (Patched)
-    seed_schema "${BASE_RAW_URL}/shape/merged-shapes.ttl"
+    # 2. Base SIMPL Shapes
+    seed_schema "${BASE_RAW_URL}/shape/simpl_shapes.ttl"
 
-    # NOTE: You can uncomment and add your custom TFDS schemas here if uploaded to the repo
-    # seed_schema "${BASE_RAW_URL}/ontology/tfds_ontology.ttl"
-    # seed_schema "${BASE_RAW_URL}/shape/tfds_shapes.ttl"
+    # 3. TFDS Extended Ontology
+    seed_schema "${BASE_RAW_URL}/ontology/tfds_ontology.ttl"
+
+    # 4. TFDS Extended Shapes
+    seed_schema "${BASE_RAW_URL}/shape/tfds_shapes.ttl"
 
     echo "--------------------------------------------------------"
     if [ "$ERRORS_OCCURRED" -eq 1 ]; then
@@ -112,12 +113,11 @@ spec:
       containers:
       - name: script-runner
         image: quay.io/curl/curl
-        command: ["/bin/sh", "-c", "/postconfig/import-ttl.sh http://xsfc-service:8081 && /postconfig/import-ttl.sh http://schema-manager-service:8085"]
+        command: ["/bin/sh", "/postconfig/import-ttl.sh", "http://xsfc-service:8081"]
         volumeMounts:
         - name: postconfig-volume
           mountPath: /postconfig
       volumes:
       - name: postconfig-volume
         configMap:
-          defaultMode: 0755
           name: import-ttl-job
