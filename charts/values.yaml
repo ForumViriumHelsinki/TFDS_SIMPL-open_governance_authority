@@ -1,6 +1,3 @@
-singleNode: ${SINGLENODE}
-authInitAutomation: ${AUTHINITAUTOMATION}
-
 values:
   repo_URL: https://github.com/ForumViriumHelsinki/TFDS_SIMPL-open_governance_authority.git
   branch: ${BRANCH}
@@ -16,8 +13,10 @@ organization:
   unit: ${ORG_UNIT}
   country: ${ORG_COUNTRY}
 
-resourcePreset: default
-# resourcePreset: low
+resourcePreset: low
+
+singleNode: ${SINGLENODE}
+authInitAutomation: ${AUTHINITAUTOMATION}
 
 argocd:
   appname: ${NAMESPACE}
