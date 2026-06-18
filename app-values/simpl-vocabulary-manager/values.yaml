@@ -1,0 +1,21 @@
+ingress:
+  enabled: true
+  path: /v1
+  pathType: Prefix # Path matching type: Exact, Prefix, or ImplementationSpecific
+  tls:
+    secretName: vocabulary-manager-tls
+  ingressClass: nginx
+
+vocabulary:
+  validation:
+    standardNamespacesResource: "classpath:standard-namespaces.properties"
+    owlReasoner:
+      enabled: true
+      maxInputStatements: 25000
+  upload:
+    maxFileSize: 5MB
+    maxRequestSize: 6MB
+
+serviceAccount:
+  enabled: true
+  name: simpl-vocabulary-manager-service-account

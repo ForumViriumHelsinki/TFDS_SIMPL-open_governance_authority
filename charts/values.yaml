@@ -173,7 +173,7 @@ fe_security_attribute_provider:
 xsfc_catalogue:
   enabled: true
   projectID: "820"
-  targetRevision: 1.0.17
+  targetRevision: 1.0.20
   chart_name: fc-service
   resources:
     requests:
@@ -202,7 +202,7 @@ onboarding:
 adapter:
   enabled: true
   projectID: "759"
-  targetRevision: 1.0.20
+  targetRevision: 1.0.24
   chart_name: poc-charts
   fullnameOverride: adapter
   valueFiles:
@@ -314,7 +314,7 @@ simpl_schema_manager:
 simpl_schema_manager_ui:
   enabled: true
   projectID: "1257"
-  targetRevision: 1.4.1
+  targetRevision: 1.5.0
   chart_name: schema-manager-ui
   fullnameOverride: simpl-schema-manager-ui
   resources:
@@ -326,6 +326,39 @@ simpl_schema_manager_ui:
       memory: "512Mi"
   valueFiles:
     - values.yaml
+
+simpl_vocabulary_manager:
+  enabled: true
+  projectID: "1577"
+  targetRevision: 0.0.1
+  chart_name: simpl-vocabulary-manager-charts
+  fullnameOverride: simpl-vocabulary-manager
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  valueFiles:
+    - values.yaml
+
+simpl_vocabulary_manager_ui:
+  enabled: true
+  projectID: "1585"
+  targetRevision: 1.0.0
+  chart_name: simpl-vocabulary-ui
+  fullnameOverride: simpl-vocabulary-manager-ui
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  valueFiles:
+    - values.yaml
+
 # Not needed in testing
 monitoring:
   enabled: true

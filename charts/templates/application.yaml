@@ -1044,3 +1044,80 @@ spec:
           {{- end }}
         {{- end }}
   {{- end }}
+  {{- if .Values.simpl_vocabulary_manager.enabled }}
+    - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.simpl_vocabulary_manager.projectID }}/packages/helm/stable"
+      path: ''
+      targetRevision: {{ .Values.simpl_vocabulary_manager.targetRevision }}
+      chart: {{ .Values.simpl_vocabulary_manager.chart_name }}
+      helm:
+        releaseName: {{ .Values.simpl_vocabulary_manager.fullnameOverride }}
+        valueFiles:
+          {{- range .Values.simpl_vocabulary_manager.valueFiles }}
+          - $values/app-values/simpl-vocabulary-manager/{{ . }}
+          {{- end }}
+        values: |
+          hashicorp:
+            service: "https://secrets.{{ .Values.namespaceTag.common }}.{{ .Values.domainSuffix }}"
+            role: {{ .Values.secrets.role }}
+            secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
+            secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-simpl-vocabulary-manager"
+          vocabulary:
+            publicBaseUrl: https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/vocabulary-manager/
+          ingress:
+            host: vocabulary-manager.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+            clusterIssuer: {{ .Values.cluster.issuer }}
+          service:
+            fuseki:
+              name: fuseki-service-vocabulary
+          {{- if eq .Values.resourcePreset "low" }}
+          resources:
+            requests:
+              cpu: "0"
+              memory: "0"
+          {{- else }}
+            {{- if .Values.simpl_vocabulary_manager.resources }}
+          resources: {{- toYaml .Values.simpl_vocabulary_manager.resources| nindent 12 }}
+            {{- end }}
+          {{- end }}
+  {{- end }}
+  {{- if .Values.simpl_vocabulary_manager_ui.enabled }}
+  - repoURL: "https://code.europa.eu/api/v4/projects/{{ .Values.simpl_vocabulary_manager_ui.projectID }}/packages/helm/stable"
+    path: ''
+    targetRevision: {{ .Values.simpl_vocabulary_manager_ui.targetRevision }}
+    chart: {{ .Values.simpl_vocabulary_manager_ui.chart_name }}
+    helm:
+      releaseName: {{ .Values.simpl_vocabulary_manager_ui.fullnameOverride }}
+      valueFiles:
+        {{- range .Values.simpl_vocabulary_manager_ui.valueFiles }}
+        - $values/app-values/simpl-vocabulary-manager-ui/{{ . }}
+        {{- end }}
+      values: |
+        ingress:
+          enabled: false
+          hosts:
+          - host: vocabulary-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+          tls:
+          - secretName: vocabulary-manager-fe-tls
+            hosts:
+              - vocabulary-manager-fe.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}
+          annotations:
+            cert-manager.io/cluster-issuer: {{ .Values.cluster.issuer }}
+        env:
+          PUBLIC_AUTH_KEYCLOAK_SERVER_URL: "https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}"
+          PUBLIC_AUTH_KEYCLOAK_REALM: 'authority'
+          PUBLIC_AUTH_KEYCLOAK_CLIENT_ID: 'frontend-cli'
+          PUBLIC_VOCABULARY_MANAGER_API_URL: 'https://authority.be.{{ .Values.namespaceTag.authority }}.{{ .Values.domainSuffix }}/vocabulary-manager/'
+        {{- if eq .Values.resourcePreset "low" }}
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+        {{- else }}
+          {{- if .Values.simpl_schema_manager_ui.resources }}
+        resources: {{- toYaml .Values.simpl_schema_manager_ui.resources| nindent 12 }}
+          {{- end }}
+        {{- end }}
+  {{- end }}
