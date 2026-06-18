@@ -616,6 +616,8 @@ spec:
           role: {{ .Values.secrets.role }}
           secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
         secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-xsfc-service"
+        env:
+          SCHEMA_MANAGER_URL: "http://schema-manager-service.{{ .Values.cluster.namespace }}.svc.cluster.local:8085"
         ingress:
           enabled: false
         {{- if eq .Values.resourcePreset "low" }}
