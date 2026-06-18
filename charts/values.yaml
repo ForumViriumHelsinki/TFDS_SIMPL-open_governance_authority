@@ -298,7 +298,7 @@ tier2_proxy:
 simpl_schema_manager:
   enabled: true
   projectID: "1124"
-  targetRevision: 0.0.20
+  targetRevision: 0.0.21
   chart_name: simpl-schema-manager-charts
   fullnameOverride: simpl-schema-manager
   resources:
