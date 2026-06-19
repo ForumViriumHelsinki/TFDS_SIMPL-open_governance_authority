@@ -202,7 +202,7 @@ onboarding:
 adapter:
   enabled: true
   projectID: "759"
-  targetRevision: 1.0.24
+  targetRevision: 1.0.20
   chart_name: poc-charts
   fullnameOverride: adapter
   valueFiles:
