@@ -616,13 +616,6 @@ spec:
           role: {{ .Values.secrets.role }}
           secretEngine: /v1/{{ .Values.secrets.secretEngine }}/data
         secretConfigPath: "/v1/{{ .Values.secrets.secretEngine }}/data/{{ .Values.cluster.namespace }}-xsfc-service"
-        command:
-          - /bin/sh
-        args:
-          - -c
-          - |
-            echo "export SCHEMA_MANAGER_URL=http://schema-manager-service.{{ .Values.cluster.namespace }}.svc.cluster.local:8085" >> /vault/secrets/config.txt
-            . /vault/secrets/config.txt && java -jar /fc-service-server.jar
         ingress:
           enabled: false
         {{- if eq .Values.resourcePreset "low" }}

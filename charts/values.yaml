@@ -173,7 +173,7 @@ fe_security_attribute_provider:
 xsfc_catalogue:
   enabled: true
   projectID: "820"
-  targetRevision: 1.0.20
+  targetRevision: 1.0.17
   chart_name: fc-service
   resources:
     requests:
