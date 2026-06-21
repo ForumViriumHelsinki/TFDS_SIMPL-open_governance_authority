@@ -328,7 +328,7 @@ simpl_schema_manager_ui:
     - values.yaml
 
 simpl_vocabulary_manager:
-  enabled: true
+  enabled: false
   projectID: "1577"
   targetRevision: 0.0.1
   chart_name: simpl-vocabulary-manager-charts
@@ -344,7 +344,7 @@ simpl_vocabulary_manager:
     - values.yaml
 
 simpl_vocabulary_manager_ui:
-  enabled: true
+  enabled: false
   projectID: "1585"
   targetRevision: 1.0.0
   chart_name: simpl-vocabulary-ui
