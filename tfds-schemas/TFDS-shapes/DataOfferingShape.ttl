@@ -22,7 +22,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "data properties" ;
         sh:node gax-validation:DataPropertiesShape ;
         sh:order 1 ;
-        sh:path simpl:dataProperties 
+        sh:path simpl:dataProperties
     ],
     [
         simpl:configure ( "hiddenInFrontend" ) ;
@@ -33,7 +33,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "edc registration" ;
         sh:node gax-validation:EdcRegistrationShape ;
         sh:order 7 ;
-        sh:path simpl:edcRegistration 
+        sh:path simpl:edcRegistration
     ],
     [
         simpl:configure ( "hiddenInFrontend" ) ;
@@ -44,7 +44,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "edc connector" ;
         sh:node gax-validation:EdcConnectorShape ;
         sh:order 8 ;
-        sh:path simpl:edcConnector 
+        sh:path simpl:edcConnector
     ],
     [
         skos:example "'(a structure object of type GeneralServiceProperties'" ;
@@ -54,7 +54,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "general service properties" ;
         sh:node gax-validation:GeneralServicePropertiesShape ;
         sh:order 1 ;
-        sh:path simpl:generalServiceProperties 
+        sh:path simpl:generalServiceProperties
     ],
     [
         skos:example "'(a structure object of type AssetProperties'" ;
@@ -64,7 +64,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "asset properties" ;
         sh:node gax-validation:AssetPropertiesShape ;
         sh:order 2 ;
-        sh:path simpl:assetProperties 
+        sh:path simpl:assetProperties
     ],
     [
         skos:example "'(a structure object of type ProviderInformation'" ;
@@ -74,7 +74,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "provider information" ;
         sh:node gax-validation:ProviderInformationShape ;
         sh:order 3 ;
-        sh:path simpl:providerInformation 
+        sh:path simpl:providerInformation
     ],
     [
         skos:example "'(a structure object of type OfferingPrice'" ;
@@ -84,7 +84,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "offering price" ;
         sh:node gax-validation:OfferingPriceShape ;
         sh:order 4 ;
-        sh:path simpl:offeringPrice 
+        sh:path simpl:offeringPrice
     ],
     [
         skos:example "'(a structure object of type ServicePolicy'" ;
@@ -94,7 +94,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "service policy" ;
         sh:node gax-validation:ServicePolicyShape ;
         sh:order 5 ;
-        sh:path simpl:servicePolicy 
+        sh:path simpl:servicePolicy
     ],
     [
         skos:example "'(a structure object of type ContractTemplate'" ;
@@ -104,7 +104,7 @@ gax-validation:DataOfferingShape a sh:NodeShape ;
         sh:name "contract template" ;
         sh:node gax-validation:ContractTemplateShape ;
         sh:order 6 ;
-        sh:path simpl:contractTemplate 
+        sh:path simpl:contractTemplate
     ] .
 
 # ==========================================
@@ -123,7 +123,7 @@ gax-validation:DataPropertiesShape a sh:NodeShape ;
         sh:name "format" ;
         sh:order 2 ;
         sh:path simpl:format ;
-        sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" 
+        sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$"
     ] .
 
 gax-validation:EdcRegistrationShape a sh:NodeShape ;
@@ -137,40 +137,7 @@ gax-validation:EdcRegistrationShape a sh:NodeShape ;
         sh:minCount 1 ;
         sh:name "contract definition id" ;
         sh:order 1 ;
-        sh:path simpl:contractDefinitionId 
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" ) ;
-        skos:example "'Identifier'" ;
-        sh:datatype xsd:string ;
-        sh:description "Unique identifier of service policy" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "service policy id" ;
-        sh:order 2 ;
-        sh:path simpl:servicePolicyId 
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" ) ;
-        skos:example "'Identifier'" ;
-        sh:datatype xsd:string ;
-        sh:description "Unique identifier of access policy" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "access policy id" ;
-        sh:order 3 ;
-        sh:path simpl:accessPolicyId 
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" ) ;
-        skos:example "'Identifier'" ;
-        sh:datatype xsd:string ;
-        sh:description "Unique identifier of asset" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "asset id" ;
-        sh:order 4 ;
-        sh:path simpl:assetId 
+        sh:path simpl:contractDefinitionId
     ] .
 
 gax-validation:EdcConnectorShape a sh:NodeShape ;
@@ -184,7 +151,7 @@ gax-validation:EdcConnectorShape a sh:NodeShape ;
         sh:minCount 1 ;
         sh:name "provider endpoint url" ;
         sh:order 1 ;
-        sh:path simpl:providerEndpointURL 
+        sh:path simpl:providerEndpointURL
     ] .
 
 gax-validation:GeneralServicePropertiesShape a sh:NodeShape ;
@@ -201,52 +168,7 @@ gax-validation:GeneralServicePropertiesShape a sh:NodeShape ;
         sh:name "name" ;
         sh:order 1 ;
         sh:path simpl:name ;
-        sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$" 
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" "useForAdvancedSearch" ) ;
-        skos:example "'550e8400-e29b-41d4-a716-446655440000'" ;
-        sh:datatype xsd:string ;
-        sh:description "Unique identifier (UUID) of the Resource Description" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "identifier" ;
-        sh:order 8 ;
-        sh:path dcterms:identifier ;
-        sh:pattern "^[a-zA-Z][a-zA-Z0-9+.-]*:.+$"
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" "useForAdvancedSearch" ) ;
-        skos:example "'1'" ;
-        sh:datatype xsd:string ;
-        sh:description "Version number of the Resource Description" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "version" ;
-        sh:order 9 ;
-        sh:path schema:version ;
-        sh:pattern "^[0-9]+(\\.[0-9]+)*$"
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" ) ;
-        skos:example "'Id'" ;
-        sh:datatype xsd:string ;
-        sh:description "Sharing Method Id type using for Resource Address Template" ;
-        sh:maxCount 1 ;
-        sh:name "sharing method id" ;
-        sh:order 7 ;
-        sh:path simpl:sharingMethodId
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" "useForAdvancedSearch" ) ;
-        skos:example "'application, data, infrastructure'" ;
-        sh:datatype xsd:string ;
-        sh:description "Offering type using for search" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "offering type" ;
-        sh:order 6 ;
-        sh:path simpl:offeringType
+        sh:pattern "^(.|\\s)*[a-zA-Z]+(.|\\s)*$"
     ] .
 
 gax-validation:AssetPropertiesShape a sh:NodeShape ;
@@ -264,30 +186,7 @@ gax-validation:ProviderInformationShape a sh:NodeShape ;
         sh:name "contact" ;
         sh:order 2 ;
         sh:path simpl:contact ;
-        sh:pattern "^[\\w\\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$" 
-    ],
-    [
-        simpl:configure ( "hiddenInFrontend" ) ;
-        skos:example "'123'" ;
-        sh:datatype xsd:string ;
-        sh:description "A reference to ID of the dataset/application/infrastructure provider" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "provided by" ;
-        sh:order 1 ;
-        sh:path simpl:providedBy 
-    ],
-    [
-        simpl:configure ( "useForAdvancedSearch" ) ;
-        skos:example "'signature'" ;
-        sh:datatype xsd:string ;
-        sh:description "A digital signature that ensures that the provider is the one that uploaded the Self-description" ;
-        sh:maxCount 1 ;
-        sh:minCount 1 ;
-        sh:name "signature" ;
-        sh:order 3 ;
-        sh:path simpl:signature ;
-        sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9\\s]*$" 
+        sh:pattern "^[\\w\\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
     ] .
 
 gax-validation:OfferingPriceShape a sh:NodeShape ;
@@ -303,7 +202,7 @@ gax-validation:OfferingPriceShape a sh:NodeShape ;
         sh:minInclusive 0.0 ;
         sh:name "price" ;
         sh:order 3 ;
-        sh:path simpl:price 
+        sh:path simpl:price
     ] .
 
 gax-validation:ServicePolicyShape a sh:NodeShape ;
@@ -317,18 +216,7 @@ gax-validation:ServicePolicyShape a sh:NodeShape ;
         sh:name "access-policy" ;
         sh:order 1 ;
         sh:path simpl:access-policy ;
-        sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" 
-    ],
-    [
-        simpl:configure ( "useForAdvancedSearch" ) ;
-        skos:example "'ODRL policy'" ;
-        sh:datatype xsd:string ;
-        sh:description "Usage policy to define how a dataset can be used" ;
-        sh:minCount 1 ;
-        sh:name "usage-policy" ;
-        sh:order 2 ;
-        sh:path simpl:usage-policy ;
-        sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+" 
+        sh:pattern "[:,\\{\\}\\[\\]]|(\".*?\")|('.*?')|[-\\w.]+"
     ] .
 
 gax-validation:ContractTemplateShape a sh:NodeShape ;
@@ -343,7 +231,7 @@ gax-validation:ContractTemplateShape a sh:NodeShape ;
         sh:minCount 1 ;
         sh:name "contract template document" ;
         sh:order 1 ;
-        sh:path simpl:contractTemplateDocument 
+        sh:path simpl:contractTemplateDocument
     ],
     [
         simpl:configure ( "hiddenInFrontend" ) ;
@@ -354,7 +242,7 @@ gax-validation:ContractTemplateShape a sh:NodeShape ;
         sh:minCount 1 ;
         sh:name "contract template hash value" ;
         sh:order 2 ;
-        sh:path simpl:contractTemplateHashValue 
+        sh:path simpl:contractTemplateHashValue
     ],
     [
         simpl:configure ( "hiddenInFrontend" ) ;
@@ -365,7 +253,7 @@ gax-validation:ContractTemplateShape a sh:NodeShape ;
         sh:minCount 1 ;
         sh:name "contract template hash alg" ;
         sh:order 3 ;
-        sh:path simpl:contractTemplateHashAlg 
+        sh:path simpl:contractTemplateHashAlg
     ],
     [
         simpl:configure ( "hiddenInFrontend" ) ;
@@ -376,5 +264,5 @@ gax-validation:ContractTemplateShape a sh:NodeShape ;
         sh:minCount 1 ;
         sh:name "contract template url" ;
         sh:order 4 ;
-        sh:path simpl:contractTemplateURL 
+        sh:path simpl:contractTemplateURL
     ] .
